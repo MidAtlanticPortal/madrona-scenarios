@@ -14,11 +14,6 @@ from django.utils.html import escape
 import mapnik
 from picklefield import PickledObjectField
 
-class KMLCache(models.Model):
-    key = models.CharField(max_length=150) 
-    val = PickledObjectField()
-    date_modified = models.DateTimeField(auto_now=True)   
-    
 @register
 class Scenario(Analysis):
     #Input Parameters
