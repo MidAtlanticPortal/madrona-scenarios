@@ -1,7 +1,7 @@
 from django import forms
 from django.forms.widgets import *
 from django.utils.safestring import mark_safe
-from madrona.analysistools.widgets import SliderWidget, DualSliderWidget
+from analysistools.widgets import SliderWidget, DualSliderWidget
 
 class AdminFileWidget(forms.FileInput):
     """

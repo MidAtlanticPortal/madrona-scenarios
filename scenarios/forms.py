@@ -1,11 +1,9 @@
-from madrona.features.forms import FeatureForm, SpatialFeatureForm
+from features.forms import FeatureForm, SpatialFeatureForm
 from django import forms
 from django.forms import ModelMultipleChoiceField, CheckboxSelectMultiple
 from django.forms.widgets import *
-from django.utils.safestring import mark_safe
-from django.contrib.gis.geos import fromstr
-from os.path import splitext, split
-from madrona.analysistools.widgets import SliderWidget, DualSliderWidget
+from os.path import splitext
+from analysistools.widgets import SliderWidget, DualSliderWidget
 from models import *
 from widgets import AdminFileWidget, SliderWidgetWithTooltip, DualSliderWidgetWithTooltip, CheckboxSelectMultipleWithTooltip, CheckboxSelectMultipleWithObjTooltip 
 
