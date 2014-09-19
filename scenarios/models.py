@@ -14,10 +14,6 @@ from django.utils.html import escape
 import mapnik
 from picklefield import PickledObjectField
 
-# from general.utils import format
-
-
-# from general.utils import format
 class KMLCache(models.Model):
     key = models.CharField(max_length=150) 
     val = PickledObjectField()
@@ -93,22 +89,23 @@ class Scenario(Analysis):
     def serialize_attributes(self):
         attributes = []
         if self.input_parameter_wind_speed:
-            wind_speed = '%s m/s' %format(self.input_avg_wind_speed, 1)
+            wind_speed = '%.1f m/s' % (self.input_avg_wind_speed)
             attributes.append({'title': 'Minimum Average Wind Speed', 'data': wind_speed})
         if self.input_parameter_distance_to_shore:
-            distance_to_shore = '%s - %s miles' %(format(self.input_min_distance_to_shore, 0), format(self.input_max_distance_to_shore, 0))
+            distance_to_shore = '%.0f - %.0f miles' % (self.input_min_distance_to_shore, 
+                                                       self.input_max_distance_to_shore)
             attributes.append({'title': 'Distance to Shore', 'data': distance_to_shore})
         if self.input_parameter_depth:
-            depth_range = '%s - %s meters' %(format(self.input_min_depth, 0), format(self.input_max_depth, 0))
+            depth_range = '%.0f - %.0f meters' %(self.input_min_depth, self.input_max_depth)
             attributes.append({'title': 'Depth Range', 'data': depth_range})
         if self.input_parameter_distance_to_awc:
-            distance_to_awc = '%s miles' %format(self.input_distance_to_awc, 0)
+            distance_to_awc = '%.0f miles' % (self.input_distance_to_awc)
             attributes.append({'title': 'Max Distance to Proposed AWC Hub', 'data': distance_to_awc})
         if self.input_parameter_distance_to_substation:
-            distance_to_substation = '%s miles' %format(self.input_distance_to_substation, 0)
+            distance_to_substation = '%.0f miles' % (self.input_distance_to_substation)
             attributes.append({'title': 'Max Distance to Coastal Substation', 'data': distance_to_substation})
         if self.input_filter_distance_to_shipping:
-            miles_to_shipping = format(self.input_distance_to_shipping, 0)
+            miles_to_shipping = round(self.input_distance_to_shipping, 0)
             if miles_to_shipping == 1:
                 distance_to_shipping = '%s mile' %miles_to_shipping
             else:
@@ -341,8 +338,6 @@ class Scenario(Analysis):
 
     @property 
     def kml(self):  
-        #from general.utils import format
-
         #the following list appendation strategy was a good 10% faster than string concatenation
         #(biggest improvement however came by adding/populating a geometry_client column in leaseblock table)
         combined_kml_list = []
@@ -372,8 +367,8 @@ class Scenario(Analysis):
                             <Data name="sediment"><value>%s</value></Data>
                             <Data name="wea_label"><value>%s</value></Data>
                             <Data name="wea_state_name"><value>%s</value></Data>
-                            <Data name="distance_to_shore"><value>%s</value></Data>
-                            <Data name="distance_to_awc"><value>%s</value></Data>
+                            <Data name="distance_to_shore"><value>%.0f</value></Data>
+                            <Data name="distance_to_awc"><value>%.0f</value></Data>
                             <Data name="wind_speed_output"><value>%s</value></Data>
                             <Data name="ais_density"><value>%s</value></Data>
                             <Data name="user"><value>%s</value></Data>
@@ -387,7 +382,7 @@ class Scenario(Analysis):
                             leaseblock.majority_sediment, #TODO: might change sediment to a more user friendly output
                             leaseblock.wea_label,
                             leaseblock.wea_state_name,
-                            format(leaseblock.avg_distance,0), format(leaseblock.awc_min_distance,0),
+                            leaseblock.avg_distance, leaseblock.awc_min_distance,
                             #LeaseBlock Update: added the following two entries (min and max) to replace avg wind speed for now
                             leaseblock.wind_speed_output,
                             leaseblock.ais_density,
@@ -623,9 +618,10 @@ class LeaseBlock(models.Model):
     @property
     def wind_speed_output(self):
         if self.min_wind_speed == self.max_wind_speed:
-            return "%s mph" %format(mps_to_mph(self.min_wind_speed),1)
+            return "%.1f mph" % (mps_to_mph(self.min_wind_speed))
         else:
-            return "%s - %s mph" %( format(mps_to_mph(self.min_wind_speed),1), format(mps_to_mph(self.max_wind_speed),1) )
+            return "%.1f - %.1f mph" % (mps_to_mph(self.min_wind_speed), 
+                                        mps_to_mph(self.max_wind_speed))
      
     @property
     def ais_density(self):
@@ -637,9 +633,9 @@ class LeaseBlock(models.Model):
     @property
     def depth_range_output(self):
         if self.min_depth == self.max_depth:
-            return "%s meters" %format(-self.min_depth,0)
+            return "$.0f meters" % (-self.min_depth)
         else:
-            return "%s - %s meters" %( format(-self.min_depth,0), format(-self.max_depth,0) )     
+            return "%.0f - %.0f meters" % (-self.min_depth, -self.max_depth)     
         
     @property 
     def kml_done(self):
@@ -697,16 +693,16 @@ class LeaseBlockSelection(Analysis):
         if (len(leaseblocks) > 0): 
             #get wind speed range
             try:
-                min_wind_speed = format(self.get_min_wind_speed(leaseblocks),3)
-                max_wind_speed = format(self.get_max_wind_speed(leaseblocks),3)
-                wind_speed_range = '%s to %s m/s' %(min_wind_speed, max_wind_speed)
+                min_wind_speed = round(self.get_min_wind_speed(leaseblocks), 3)
+                max_wind_speed = round(self.get_max_wind_speed(leaseblocks), 3)
+                wind_speed_range = '%s to %s m/s' % (min_wind_speed, max_wind_speed)
             except:
                 min_wind_speed = 'Unknown'
                 max_wind_speed = 'Unknown'
                 wind_speed_range = 'Unknown'
             attributes.append({'title': 'Average Wind Speed Range', 'data': wind_speed_range})
             try:
-                avg_wind_speed = format(self.get_avg_wind_speed(leaseblocks),3)
+                avg_wind_speed = round(self.get_avg_wind_speed(leaseblocks), 3)
                 avg_wind_speed_output = '%s m/s' %avg_wind_speed
             except:
                 avg_wind_speed = 'Unknown'
@@ -715,53 +711,53 @@ class LeaseBlockSelection(Analysis):
             report_values['wind-speed'] = {'min': min_wind_speed, 'max': max_wind_speed, 'avg': avg_wind_speed, 'selection_id': self.uid}
             
             #get distance to coastal substation
-            min_distance_to_substation = format(self.get_min_distance_to_substation(leaseblocks), 0)
-            max_distance_to_substation = format(self.get_max_distance_to_substation(leaseblocks), 0)
+            min_distance_to_substation = round(self.get_min_distance_to_substation(leaseblocks))
+            max_distance_to_substation = round(self.get_max_distance_to_substation(leaseblocks))
             distance_to_substation_range = '%s to %s miles' %(min_distance_to_substation, max_distance_to_substation)
             attributes.append({'title': 'Distance to Coastal Substation', 'data': distance_to_substation_range})
-            avg_distance_to_substation = format(self.get_avg_distance_to_substation(leaseblocks), 1)
+            avg_distance_to_substation = round(self.get_avg_distance_to_substation(leaseblocks), 1)
             avg_distance_to_substation_output = '%s miles' %avg_distance_to_substation
             attributes.append({'title': 'Average Distance to Coastal Substation', 'data': avg_distance_to_substation_output})
             report_values['distance-to-substation'] = {'min': min_distance_to_substation, 'max': max_distance_to_substation, 'avg': avg_distance_to_substation, 'selection_id': self.uid}
                         
             #get distance to awc range
-            min_distance_to_awc = format(self.get_min_distance_to_awc(leaseblocks), 0)
-            max_distance_to_awc = format(self.get_max_distance_to_awc(leaseblocks), 0)
+            min_distance_to_awc = round(self.get_min_distance_to_awc(leaseblocks), 0)
+            max_distance_to_awc = round(self.get_max_distance_to_awc(leaseblocks), 0)
             distance_to_awc_range = '%s to %s miles' %(min_distance_to_awc, max_distance_to_awc)
             attributes.append({'title': 'Distance to Proposed AWC Hub', 'data': distance_to_awc_range})
-            avg_distance_to_awc = format(self.get_avg_distance_to_awc(leaseblocks), 1)
+            avg_distance_to_awc = round(self.get_avg_distance_to_awc(leaseblocks), 1)
             avg_distance_to_awc_output = '%s miles' %avg_distance_to_awc
             attributes.append({'title': 'Average Distance to Proposed AWC Hub', 'data': avg_distance_to_awc_output})
             report_values['distance-to-awc'] = {'min': min_distance_to_awc, 'max': max_distance_to_awc, 'avg': avg_distance_to_awc, 'selection_id': self.uid}
             
             #get distance to shipping lanes
-            min_distance_to_shipping = format(self.get_min_distance_to_shipping(leaseblocks), 0)
-            max_distance_to_shipping = format(self.get_max_distance_to_shipping(leaseblocks), 0)
+            min_distance_to_shipping = round(self.get_min_distance_to_shipping(leaseblocks), 0)
+            max_distance_to_shipping = round(self.get_max_distance_to_shipping(leaseblocks), 0)
             miles_to_shipping = '%s to %s miles' %(min_distance_to_shipping, max_distance_to_shipping)
             attributes.append({'title': 'Distance to Ship Routing Measures', 'data': miles_to_shipping})
-            avg_distance_to_shipping = format(self.get_avg_distance_to_shipping(leaseblocks),1)
+            avg_distance_to_shipping = round(self.get_avg_distance_to_shipping(leaseblocks),1)
             avg_distance_to_shipping_output = '%s miles' %avg_distance_to_shipping
             attributes.append({'title': 'Average Distance to Ship Routing Measures', 'data': avg_distance_to_shipping_output})
             report_values['distance-to-shipping'] = {'min': min_distance_to_shipping, 'max': max_distance_to_shipping, 'avg': avg_distance_to_shipping, 'selection_id': self.uid}
             
             #get distance to shore range
-            min_distance = format(self.get_min_distance(leaseblocks), 0)
-            max_distance = format(self.get_max_distance(leaseblocks), 0)
+            min_distance = round(self.get_min_distance(leaseblocks), 0)
+            max_distance = round(self.get_max_distance(leaseblocks), 0)
             distance_to_shore = '%s to %s miles' %(min_distance, max_distance)
             attributes.append({'title': 'Distance to Shore', 'data': distance_to_shore})
-            avg_distance = format(self.get_avg_distance(leaseblocks),1)
+            avg_distance = round(self.get_avg_distance(leaseblocks),1)
             avg_distance_output = '%s miles' %avg_distance
             attributes.append({'title': 'Average Distance to Shore', 'data': avg_distance_output})
             report_values['distance-to-shore'] = {'min': min_distance, 'max': max_distance, 'avg': avg_distance, 'selection_id': self.uid}
             
             #get depth range
-            min_depth = format(self.get_min_depth(leaseblocks), 0)
-            max_depth = format(self.get_max_depth(leaseblocks), 0)
+            min_depth = round(self.get_min_depth(leaseblocks), 0)
+            max_depth = round(self.get_max_depth(leaseblocks), 0)
             depth_range = '%s to %s meters' %(min_depth, max_depth)
             if min_depth == 0 or max_depth == 0:
                 depth_range = 'Unknown'
             attributes.append({'title': 'Depth', 'data': depth_range})
-            avg_depth = format(self.get_avg_depth(leaseblocks), 0)
+            avg_depth = round(self.get_avg_depth(leaseblocks), 0)
             avg_depth_output = '%s meters' %avg_depth
             if avg_depth == 0:
                 avg_depth_output = 'Unknown'
