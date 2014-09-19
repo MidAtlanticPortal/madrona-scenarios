@@ -3,6 +3,8 @@
 	<name>madrona-scenarios</name>
 	<comment></comment>
 	<projects>
+		<project>madrona-analysistools</project>
+		<project>Nursery</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

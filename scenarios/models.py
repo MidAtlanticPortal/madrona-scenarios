@@ -2,23 +2,30 @@ import os
 import time
 import json
 from picklefield import PickledObjectField
-from django.db import models
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.utils.html import escape
-from madrona.common.utils import asKml
-from madrona.common.jsonutils import get_properties_json, get_feature_json
-from madrona.features import register
-from madrona.analysistools.models import Analysis
-from general.utils import miles_to_meters, feet_to_meters, meters_to_feet, mph_to_mps, mps_to_mph, format
-
+from nursery.kml.kml import asKml
+from nursery.geojson.geojson import get_properties_json, get_feature_json
+from features.registry import register
+from analysistools.models import Analysis
+from nursery.unit_conversions.unit_conversions import (mph_to_mps, 
+                                                       mps_to_mph)
+from scenarios.kml_caching import cache_kml, remove_kml_cache #has to follow KMLCache to prevent circular imports
+# from general.utils import format
+from general.utils import format
+from django.contrib.gis.geos import MultiPolygon
+from kml_caching import remove_kml_cache
+import mapnik
+import time
+from general.utils import format
+from django.contrib.gis.geos import MultiPolygon
 
 class KMLCache(models.Model):
     key = models.CharField(max_length=150) 
     val = PickledObjectField()
     date_modified = models.DateTimeField(auto_now=True)   
     
-from scenarios.kml_caching import cache_kml, remove_kml_cache #has to follow KMLCache to prevent circular imports
 @register
 class Scenario(Analysis):
     #Input Parameters
@@ -87,7 +94,6 @@ class Scenario(Analysis):
                 
     @property
     def serialize_attributes(self):
-        from general.utils import format
         attributes = []
         if self.input_parameter_wind_speed:
             wind_speed = '%s m/s' %format(self.input_avg_wind_speed, 1)
@@ -177,7 +183,6 @@ class Scenario(Analysis):
             except:
                 pass
         
-        from django.contrib.gis.geos import MultiPolygon
         if type(dissolved_geom) == MultiPolygon:
             self.geometry_dissolved = dissolved_geom
         else:
@@ -245,7 +250,6 @@ class Scenario(Analysis):
         """
         Remove KML cache before removing scenario 
         """
-        from kml_caching import remove_kml_cache
         remove_kml_cache(self)
         super(Scenario, self).delete(*args, **kwargs)    
     
@@ -261,7 +265,6 @@ class Scenario(Analysis):
 
     @classmethod
     def mapnik_style(self):
-        import mapnik
         polygon_style = mapnik.Style()
         
         ps = mapnik.PolygonSymbolizer(mapnik.Color('#ffffff'))
@@ -355,8 +358,7 @@ class Scenario(Analysis):
     @property 
     @cache_kml
     def kml(self):  
-        #from general.utils import format 
-        import time
+        #from general.utils import format
 
         #the following list appendation strategy was a good 10% faster than string concatenation
         #(biggest improvement however came by adding/populating a geometry_client column in leaseblock table)
@@ -706,7 +708,6 @@ class LeaseBlockSelection(Analysis):
     
     @property
     def serialize_attributes(self):
-        from general.utils import format
         attributes = []
         report_values = {}
         leaseblocks = LeaseBlock.objects.filter(prot_numb__in=self.leaseblock_ids.split(','))
@@ -942,7 +943,6 @@ class LeaseBlockSelection(Analysis):
         leaseblocks = LeaseBlock.objects.filter(prot_numb__in=self.leaseblock_ids.split(','))
         leaseblock_geoms = [lb.geometry for lb in leaseblocks]
         
-        from django.contrib.gis.geos import MultiPolygon
         dissolved_geom = leaseblock_geoms[0]
         for geom in leaseblock_geoms:
             try:
