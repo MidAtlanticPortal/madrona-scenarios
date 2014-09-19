@@ -3,24 +3,20 @@ from features.registry import register
 import json
 from nursery.geojson.geojson import get_properties_json, get_feature_json
 from nursery.kml.kml import asKml
-from nursery.unit_conversions.unit_conversions import (mph_to_mps,
-                                                       mps_to_mph)
+from nursery.unit_conversions.unit_conversions import mph_to_mps, mps_to_mph
 import os
 from scenarios.kml_caching import cache_kml, remove_kml_cache # has to follow KMLCache to prevent circular imports
-import time
 import time
 
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import MultiPolygon
-from django.contrib.gis.geos import MultiPolygon
 from django.utils.html import escape
 import mapnik
 from picklefield import PickledObjectField
 
-from general.utils import format
-from general.utils import format
-from kml_caching import remove_kml_cache
+# from general.utils import format
+# from kml_caching import remove_kml_cache
 
 
 # from general.utils import format
