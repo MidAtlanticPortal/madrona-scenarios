@@ -5,7 +5,6 @@ from nursery.geojson.geojson import get_properties_json, get_feature_json
 from nursery.kml.kml import asKml
 from nursery.unit_conversions.unit_conversions import mph_to_mps, mps_to_mph
 import os
-from scenarios.kml_caching import cache_kml, remove_kml_cache # has to follow KMLCache to prevent circular imports
 import time
 
 from django.conf import settings
@@ -16,7 +15,6 @@ import mapnik
 from picklefield import PickledObjectField
 
 # from general.utils import format
-# from kml_caching import remove_kml_cache
 
 
 # from general.utils import format
@@ -209,19 +207,14 @@ class Scenario(Analysis):
             rerun = False
             if not rerun:
                 orig = Scenario.objects.get(pk=self.pk)
-                #TODO: keeping this in here til I figure out why self.lease_blocks and self.geometry_final_area are emptied when run() is not called
-                remove_kml_cache(self)
+
                 rerun = True
-                #if getattr(orig, 'name') != getattr(self, 'name'):
-                #    #print 'name has changed'
-                #    remove_kml_cache(self) 
-                #    rerun = True
+
                 if not rerun:
                     for f in Scenario.input_fields():
                         # Is original value different from form value?
                         if getattr(orig, f.name) != getattr(self, f.name):
                             #print 'input_field, %s, has changed' %f.name
-                            remove_kml_cache(self)
                             rerun = True
                             break                                                                                                                   
                 if not rerun:
@@ -239,18 +232,10 @@ class Scenario(Analysis):
                     new_substrates = set(getattr(self, 'input_substrate').all()) 
                     new_sediments = set(getattr(self, 'input_sediment').all())   
                     if orig_substrates != new_substrates or orig_sediments != new_sediments or orig_weas != new_weas:
-                        remove_kml_cache(self) 
                         rerun = True    
             super(Scenario, self).save(rerun=rerun, *args, **kwargs)
         else: #editing a scenario and rerun is provided 
             super(Scenario, self).save(rerun=rerun, *args, **kwargs)
-    
-    def delete(self, *args, **kwargs):
-        """
-        Remove KML cache before removing scenario 
-        """
-        remove_kml_cache(self)
-        super(Scenario, self).delete(*args, **kwargs)    
     
     def __unicode__(self):
         return u'%s' % self.name
@@ -355,7 +340,6 @@ class Scenario(Analysis):
         """ % (self.uid, escape(self.name))
 
     @property 
-    @cache_kml
     def kml(self):  
         #from general.utils import format
 
