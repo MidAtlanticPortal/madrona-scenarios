@@ -1,26 +1,29 @@
-import os
-import time
+from analysistools.models import Analysis
+from features.registry import register
 import json
-from picklefield import PickledObjectField
+from nursery.geojson.geojson import get_properties_json, get_feature_json
+from nursery.kml.kml import asKml
+from nursery.unit_conversions.unit_conversions import (mph_to_mps,
+                                                       mps_to_mph)
+import os
+from scenarios.kml_caching import cache_kml, remove_kml_cache # has to follow KMLCache to prevent circular imports
+import time
+import time
+
 from django.conf import settings
 from django.contrib.gis.db import models
+from django.contrib.gis.geos import MultiPolygon
+from django.contrib.gis.geos import MultiPolygon
 from django.utils.html import escape
-from nursery.kml.kml import asKml
-from nursery.geojson.geojson import get_properties_json, get_feature_json
-from features.registry import register
-from analysistools.models import Analysis
-from nursery.unit_conversions.unit_conversions import (mph_to_mps, 
-                                                       mps_to_mph)
-from scenarios.kml_caching import cache_kml, remove_kml_cache #has to follow KMLCache to prevent circular imports
-# from general.utils import format
-from general.utils import format
-from django.contrib.gis.geos import MultiPolygon
-from kml_caching import remove_kml_cache
 import mapnik
-import time
-from general.utils import format
-from django.contrib.gis.geos import MultiPolygon
+from picklefield import PickledObjectField
 
+from general.utils import format
+from general.utils import format
+from kml_caching import remove_kml_cache
+
+
+# from general.utils import format
 class KMLCache(models.Model):
     key = models.CharField(max_length=150) 
     val = PickledObjectField()
