@@ -1,7 +1,7 @@
 from features.models import Feature
 from features.registry import get_feature_by_uid
 from json import dumps
-from nursery.geojson.geojson import srid_to_urn
+from nursery.geojson.geojson import srid_to_urn, get_feature_json
 
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
@@ -9,7 +9,11 @@ from django.template.defaultfilters import slugify
 from django.views.decorators.cache import cache_page
 
 from features.registry import user_sharing_groups
-from scenarios.models import Scenario
+from scenarios.models import Scenario, LeaseBlockSelection, LeaseBlock
+from django.conf import settings
+import json
+from functools import cmp_to_key
+import locale
 
 
 def sdc_analysis(request, sdc_id):
@@ -100,8 +104,7 @@ def get_scenarios(request):
         
     return HttpResponse(dumps(json))
 
-'''
-'''    
+
 def get_selections(request):
     json = []
     selections = LeaseBlockSelection.objects.filter(user=request.user).order_by('date_created')
@@ -167,8 +170,7 @@ def get_leaseblock_features(request):
     }""" % (srid_to_urn(srid), ', \n'.join(feature_jsons),)
     return HttpResponse(geojson)
     
-'''
-'''    
+
 def get_attributes(request, uid):
     try:
         scenario_obj = get_feature_by_uid(uid)
@@ -181,12 +183,10 @@ def get_attributes(request, uid):
         return response
     
     return HttpResponse(dumps(scenario_obj.serialize_attributes))
-    
-'''
-'''    
+
+
 def get_sharing_groups(request):
-    from functools import cmp_to_key
-    import locale
+    # FIXME: setlocale is not thread safe, and why are we setting the locale here? 
     locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
     json = []
     sharing_groups = user_sharing_groups(request.user)
@@ -200,7 +200,7 @@ def get_sharing_groups(request):
         sorted_members = sorted(members, key=cmp_to_key(locale.strcoll))
         json.append({
             'group_name': group.name,
-            'group_slug': slugify(group.name)+'-sharing',
+            'group_slug': slugify(group.name) + '-sharing',
             'members': sorted_members
         })
     return HttpResponse(dumps(json))
