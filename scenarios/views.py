@@ -193,7 +193,7 @@ def get_sharing_groups(request):
     for group in sharing_groups:
         members = []
         for user in group.user_set.all():
-            if user.first_name.replace(' ', '') != '' and user.last_name.replace(' ', '') != '':
+            if user.first_name.strip() and user.last_name.strip():
                 members.append(user.first_name + ' ' + user.last_name)
             else:
                 members.append(user.username)
