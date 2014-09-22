@@ -1,27 +1,27 @@
+from features.models import Feature
+from features.registry import get_feature_by_uid
+from json import dumps
+from nursery.geojson.geojson import srid_to_urn
+
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import slugify
 from django.views.decorators.cache import cache_page
-from madrona.features.models import Feature
-from madrona.features import get_feature_by_uid
-from general.utils import meters_to_feet
-from models import *
-from simplejson import dumps
+
+from features.registry import user_sharing_groups
+from scenarios.models import Scenario
 
 
-'''
-'''
 def sdc_analysis(request, sdc_id):
     from sdc_analysis import display_sdc_analysis
     sdc_obj = get_object_or_404(Scenario, pk=sdc_id)
-    #check permissions
+    # check permissions
     viewable, response = sdc_obj.is_viewable(request.user)
     if not viewable:
         return response
     return display_sdc_analysis(request, sdc_obj)
     
-'''
-'''
+
 def copy_design(request, uid):
     try:
         design_obj = get_feature_by_uid(uid)
@@ -48,8 +48,7 @@ def copy_design(request, uid):
     
     return HttpResponse(dumps(json), status=200)
     
-'''
-'''
+
 def delete_design(request, uid):
     try:
         design_obj = get_feature_by_uid(uid)
@@ -67,8 +66,7 @@ def delete_design(request, uid):
     
     return HttpResponse("", status=200)
 
-'''
-'''
+
 def get_scenarios(request):
     json = []
     
@@ -139,7 +137,6 @@ def get_selections(request):
 '''
 '''    
 def get_leaseblock_features(request):
-    from madrona.common.jsonutils import get_properties_json, get_feature_json, srid_to_urn, srid_to_proj
     srid = settings.GEOJSON_SRID
     leaseblock_ids = request.GET.getlist('leaseblock_ids[]')
     leaseblocks = LeaseBlock.objects.filter(prot_numb__in=leaseblock_ids)
@@ -153,7 +150,7 @@ def get_leaseblock_features(request):
         feature_jsons.append(get_feature_json(geom, json.dumps('')))#json.dumps(props)))
         #feature_jsons.append(leaseblock.geometry.transform(srid, clone=True).json)
         '''
-        geojson = """{ 
+        geojson = """{
           "type": "Feature",
           "geometry": %s,
           "properties": {}
@@ -188,7 +185,6 @@ def get_attributes(request, uid):
 '''
 '''    
 def get_sharing_groups(request):
-    from madrona.features import user_sharing_groups
     from functools import cmp_to_key
     import locale
     locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
