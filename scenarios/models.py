@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import MultiPolygon
 from django.utils.html import escape
-import mapnik
+# import mapnik
 from picklefield import PickledObjectField
 
 @register
