@@ -12,6 +12,7 @@ setup(
     packages=['scenarios'],
     install_requires=[
         'django-flatblocks',
+        'django-picklefield',
     ],
     include_package_data=True,
     license='TBD',
