@@ -5,6 +5,10 @@ admin.site.register(Permission)
 
 from models import *
 
+from django.contrib.gis import admin as geoadmin
+geoadmin.site.register(LeaseBlock)
+geoadmin.site.register(LeaseBlockSelection)
+
 class ScenarioAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'user', 'active', 'date_created', 'date_modified')
     list_filter = ['date_modified', 'date_created']
