@@ -8,7 +8,6 @@ madrona.onShow(function(){
         $(this).hide();
     });
     
-    updateDesignScrollBar();
     
     function validate(step) {
         if (step == 1) {/*
@@ -58,8 +57,6 @@ madrona.onShow(function(){
             $(this).hide();
         });
         $('div#step' + step).show();
-        updateDesignScrollBar();
-        $('#wind-design-form').data('jsp').scrollTo(0,0);
         
 
         if (step == 1) {
@@ -85,15 +82,6 @@ madrona.onShow(function(){
     function showhide_widget(element) {
         element.fadeToggle(100); //slideToggle
     }  
-    
-    function updateDesignScrollBar() {
-        var designsWizardScrollpane = $('#wind-design-form').data('jsp');
-        if (designsWizardScrollpane === undefined) {
-            $('#wind-design-form').jScrollPane();
-        } else {
-            setTimeout(function() {designsWizardScrollpane.reinitialise();},200);
-        }
-    }
     
     function updateRemaininLeaseBlocks() {
         app.viewModel.scenarios.scenarioFormModel.updateLeaseblocksLeft();
