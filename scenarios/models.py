@@ -455,8 +455,8 @@ class Scenario(Analysis):
         verbose_name = 'Spatial Design for Wind Energy'
         icon_url = 'marco/img/multi.png'
         form = 'scenarios.forms.ScenarioForm'
-        form_template = 'scenario/form.html'
-        show_template = 'scenario/show.html'
+        form_template = 'scenarios/form.html'
+        show_template = 'scenarios/show.html'
 
 #no longer needed?
 class Objective(models.Model):
