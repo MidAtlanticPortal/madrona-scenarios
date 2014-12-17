@@ -348,7 +348,7 @@
 <p><button type="submit" value="submit" class="btn-submit btn">submit</button></p>
 </form>
 
-<div class="show-blocks-btn" data-bind="visible: app.viewModel.modernBrowser()">
+<div class="show-blocks-btn">
     <span data-bind="visible: !isLeaseblockLayerVisible()">
         <a class="button btn" data-bind="click: activateLeaseblockLayer">
             <span class="badge" style="margin-right: 5px; margin-left: -5px;" data-bind="text: leaseblocksLeft"></span> Lease Blocks Remaining 
@@ -365,7 +365,7 @@
     </span>
 </div>
 
-<div class="show-blocks-btn" style="padding-right: 1px; color: #333333" data-bind="visible: ! app.viewModel.modernBrowser()">
+<div class="show-blocks-btn" style="padding-right: 1px; color: #333333">
     <label>Lease Blocks Remaining: <span data-bind="text: leaseblocksLeft"></span></label>
 </div>
 
