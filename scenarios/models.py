@@ -10,6 +10,7 @@ import time
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import MultiPolygon
+from django.contrib.gis.db.models.aggregates import Union
 from django.utils.html import escape
 # import mapnik
 from picklefield import PickledObjectField
@@ -124,9 +125,6 @@ class Scenario(Analysis):
     
         result = LeaseBlock.objects.all()
         
-        #import pdb
-        #pdb.set_trace()
-        #GeoPhysical
         if self.input_parameter_distance_to_shore:
             #why isn't this max_distance >= input.min_distance && min_distance <= input.max_distance ???
             result = result.filter(avg_distance__gte=self.input_min_distance_to_shore, avg_distance__lte=self.input_max_distance_to_shore)
@@ -164,32 +162,32 @@ class Scenario(Analysis):
         #Security
         if self.input_filter_uxo:
             result = result.filter(uxo=0)
-            
-        dissolved_geom = result[0].geometry
-        for lb in result:
-            try:
-                dissolved_geom = dissolved_geom.union(lb.geometry)
-            except:
-                pass
+        
+        dissolved_geom = result.aggregate(Union('geometry'))
+        
+        if dissolved_geom:
+            dissolved_geom = dissolved_geom['geometry__union']
+        else:
+            raise Exception("No lease blocks available with the current filters.")
         
         if type(dissolved_geom) == MultiPolygon:
             self.geometry_dissolved = dissolved_geom
         else:
-            self.geometry_dissolved = MultiPolygon(dissolved_geom, srid=dissolved_geom.srid)
+            self.geometry_dissolved = MultiPolygon(dissolved_geom, 
+                                                   srid=dissolved_geom.srid) 
+        
         self.active = True
-        
-        
-        self.geometry_final_area = sum([lb.geometry.area for lb in result.all()])
-        leaseblock_ids = [lb.id for lb in result.all()]
-        self.lease_blocks = ','.join(map(str, leaseblock_ids))
-        
-        #pdb.set_trace()
-        
-        
-        if self.lease_blocks == '':
-            self.satisfied = False
-        else:
+
+        self.geometry_final_area = self.geometry_dissolved.area
+        self.lease_blocks = ','.join(str(i) 
+                                     for i in result.values_list('id', 
+                                                                 flat=True))
+
+        if self.lease_blocks:
             self.satisfied = True
+        else:
+            self.satisfied = False
+
         return True        
     
     def save(self, rerun=None, *args, **kwargs):
@@ -915,14 +913,12 @@ class LeaseBlockSelection(Analysis):
     
     def run(self):
         leaseblocks = LeaseBlock.objects.filter(prot_numb__in=self.leaseblock_ids.split(','))
-        leaseblock_geoms = [lb.geometry for lb in leaseblocks]
         
-        dissolved_geom = leaseblock_geoms[0]
-        for geom in leaseblock_geoms:
-            try:
-                dissolved_geom = dissolved_geom.union(geom)
-            except:
-                pass
+        dissolved_geom = leaseblocks.aggregate(Union('geometry'))
+        if dissolved_geom:
+            dissolved_geom = dissolved_geom['geometry__union']
+        else:
+            raise Exception("No lease blocks available with the current filters.")
         
         if type(dissolved_geom) == MultiPolygon:
             self.geometry_actual = dissolved_geom
