@@ -29,45 +29,45 @@ class Scenario(Analysis):
     
     #GeoPhysical
     
-    input_parameter_depth = models.BooleanField(verbose_name='Depth Parameter')
+    input_parameter_depth = models.BooleanField(verbose_name='Depth Parameter', default=False)
     input_min_depth = models.FloatField(verbose_name='Minimum Depth', null=True, blank=True)
     input_max_depth = models.FloatField(verbose_name='Maximum Depth', null=True, blank=True)
     
-    input_parameter_distance_to_shore = models.BooleanField(verbose_name='Distance to Shore')
+    input_parameter_distance_to_shore = models.BooleanField(verbose_name='Distance to Shore', default=False)
     input_min_distance_to_shore = models.FloatField(verbose_name='Minimum Distance to Shore', null=True, blank=True)
     input_max_distance_to_shore = models.FloatField(verbose_name='Maximum Distance to Shore', null=True, blank=True)
     
-    input_parameter_substrate = models.BooleanField(verbose_name='Substrate Parameter')
+    input_parameter_substrate = models.BooleanField(verbose_name='Substrate Parameter', default=False)
     input_substrate = models.ManyToManyField('Substrate', null=True, blank=True)
     
-    input_parameter_sediment = models.BooleanField(verbose_name='Sediment Parameter')
+    input_parameter_sediment = models.BooleanField(verbose_name='Sediment Parameter', default=False)
     input_sediment = models.ManyToManyField('Sediment', null=True, blank=True)
     
     #Wind Energy 
     
-    input_parameter_wind_speed = models.BooleanField(verbose_name='Wind Speed Parameter')
+    input_parameter_wind_speed = models.BooleanField(verbose_name='Wind Speed Parameter', default=False)
     input_avg_wind_speed = models.FloatField(verbose_name='Average Wind Speed', null=True, blank=True)
     
-    input_parameter_distance_to_awc = models.BooleanField(verbose_name='Distance to AWC Station')
+    input_parameter_distance_to_awc = models.BooleanField(verbose_name='Distance to AWC Station', default=False)
     input_distance_to_awc = models.FloatField(verbose_name='Maximum Distance to AWC Station', null=True, blank=True)
     
-    input_parameter_distance_to_substation = models.BooleanField(verbose_name='Distance to Coastal Substation')
+    input_parameter_distance_to_substation = models.BooleanField(verbose_name='Distance to Coastal Substation', default=False)
     input_distance_to_substation = models.FloatField(verbose_name='Maximum Distance to Coastal Substation', null=True, blank=True)
     
-    input_parameter_wea = models.BooleanField(verbose_name='WEA Parameter')
+    input_parameter_wea = models.BooleanField(verbose_name='WEA Parameter', default=False)
     input_wea = models.ManyToManyField('WEA', null=True, blank=True)
     
     #Shipping
     
-    input_filter_ais_density = models.BooleanField(verbose_name='Excluding Areas with AIS Density >= 1')
+    input_filter_ais_density = models.BooleanField(verbose_name='Excluding Areas with AIS Density >= 1', default=False)
     #input_ais_density = models.FloatField(verbose_name='Mean AIS Density', null=True, blank=True)    
     
-    input_filter_distance_to_shipping = models.BooleanField(verbose_name='Distance to Ship Routing Measures')
+    input_filter_distance_to_shipping = models.BooleanField(verbose_name='Distance to Ship Routing Measures', default=False)
     input_distance_to_shipping = models.FloatField(verbose_name='Minimum Distance to Ship Routing Measures', null=True, blank=True)
     
     #Security
     
-    input_filter_uxo = models.BooleanField(verbose_name='Excluding Areas with UXO')
+    input_filter_uxo = models.BooleanField(verbose_name='Excluding Areas with UXO', default=False)
     
     #Descriptors (name field is inherited from Analysis)
     
