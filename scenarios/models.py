@@ -813,7 +813,7 @@ class LeaseBlockSelection(Analysis):
             data = [x for x in data if x]
 
         # Deal with any remaining None values
-        if None in data:
+        if not data or None in data:
             if isinstance(handle_none, Exception):
                 # We raise the exception to be handled upstream
                 raise handle_none
@@ -827,7 +827,7 @@ class LeaseBlockSelection(Analysis):
         # TODO assert agg is numeric
         if offset:
             agg = agg + offset
-        if digits and isinstance(digits, int):
+        if isinstance(digits, int):
             agg = round(agg, digits)
 
         return agg
