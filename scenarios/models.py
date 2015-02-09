@@ -585,7 +585,7 @@ class LeaseBlock(models.Model):
         try:
             return (self.min_wind_speed_rev + self.max_wind_speed_rev) / 2.0
         except:
-            return 'Unknown'
+            return None
 
     @property
     def substrate(self):
@@ -809,8 +809,8 @@ class LeaseBlockSelection(Analysis):
         """
         if filter_null:
             # Filter the incoming data to remove "nulls"
-            # remove anything that lacks truthiness (most commonly None)
-            data = [x for x in data if x]
+            # remove anything that is not a number
+            data = [x for x in data if isinstance(x, (int, long, float, complex))]
 
         # Deal with any remaining None values
         if not data or None in data:
@@ -824,7 +824,6 @@ class LeaseBlockSelection(Analysis):
 
         # Rounding and offsetting
         agg = func(data)
-        # TODO assert agg is numeric
         if offset:
             agg = agg + offset
         if isinstance(digits, int):
