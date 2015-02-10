@@ -581,6 +581,13 @@ class LeaseBlock(models.Model):
     objects = models.GeoManager()   
 
     @property
+    def avg_wind_speed(self):
+        try:
+            return (self.min_wind_speed_rev + self.max_wind_speed_rev) / 2.0
+        except:
+            return None
+
+    @property
     def substrate(self):
         try:
             return Substrate.objects.get(substrate_id=self.majority_seabed).substrate_name
@@ -670,246 +677,159 @@ class WEA(models.Model):
 
 @register
 class LeaseBlockSelection(Analysis):
-    #input_a = models.IntegerField()
-    #input_b = models.IntegerField()
-    #output_sum = models.IntegerField(blank=True, null=True)
     leaseblock_ids = models.TextField()
     description = models.TextField(null=True, blank=True)
-    #leaseblocks = models.ManyToManyField("LeaseBlock", null=True, blank=True)
-    geometry_actual = models.MultiPolygonField(srid=settings.GEOMETRY_DB_SRID, null=True, blank=True, verbose_name="Lease Block Selection Geometry")
+    geometry_actual = models.MultiPolygonField(srid=settings.GEOMETRY_DB_SRID,
+        null=True, blank=True, verbose_name="Lease Block Selection Geometry")
     
     @property
     def serialize_attributes(self):
-        attributes = []
-        report_values = {}
-        leaseblocks = LeaseBlock.objects.filter(prot_numb__in=self.leaseblock_ids.split(','))
-        if (len(leaseblocks) > 0): 
-            #get wind speed range
-            try:
-                min_wind_speed = round(self.get_min_wind_speed(leaseblocks), 3)
-                max_wind_speed = round(self.get_max_wind_speed(leaseblocks), 3)
-                wind_speed_range = '%s to %s m/s' % (min_wind_speed, max_wind_speed)
-            except:
-                min_wind_speed = 'Unknown'
-                max_wind_speed = 'Unknown'
-                wind_speed_range = 'Unknown'
-            attributes.append({'title': 'Average Wind Speed Range', 'data': wind_speed_range})
-            try:
-                avg_wind_speed = round(self.get_avg_wind_speed(leaseblocks), 3)
-                avg_wind_speed_output = '%s m/s' %avg_wind_speed
-            except:
-                avg_wind_speed = 'Unknown'
-                avg_wind_speed_output = 'Unknown'
-            attributes.append({'title': 'Average Wind Speed', 'data': avg_wind_speed_output})
-            report_values['wind-speed'] = {'min': min_wind_speed, 'max': max_wind_speed, 'avg': avg_wind_speed, 'selection_id': self.uid}
-            
-            #get distance to coastal substation
-            min_distance_to_substation = round(self.get_min_distance_to_substation(leaseblocks))
-            max_distance_to_substation = round(self.get_max_distance_to_substation(leaseblocks))
-            distance_to_substation_range = '%s to %s miles' %(min_distance_to_substation, max_distance_to_substation)
-            attributes.append({'title': 'Distance to Coastal Substation', 'data': distance_to_substation_range})
-            avg_distance_to_substation = round(self.get_avg_distance_to_substation(leaseblocks), 1)
-            avg_distance_to_substation_output = '%s miles' %avg_distance_to_substation
-            attributes.append({'title': 'Average Distance to Coastal Substation', 'data': avg_distance_to_substation_output})
-            report_values['distance-to-substation'] = {'min': min_distance_to_substation, 'max': max_distance_to_substation, 'avg': avg_distance_to_substation, 'selection_id': self.uid}
-                        
-            #get distance to awc range
-            min_distance_to_awc = round(self.get_min_distance_to_awc(leaseblocks), 0)
-            max_distance_to_awc = round(self.get_max_distance_to_awc(leaseblocks), 0)
-            distance_to_awc_range = '%s to %s miles' %(min_distance_to_awc, max_distance_to_awc)
-            attributes.append({'title': 'Distance to Proposed AWC Hub', 'data': distance_to_awc_range})
-            avg_distance_to_awc = round(self.get_avg_distance_to_awc(leaseblocks), 1)
-            avg_distance_to_awc_output = '%s miles' %avg_distance_to_awc
-            attributes.append({'title': 'Average Distance to Proposed AWC Hub', 'data': avg_distance_to_awc_output})
-            report_values['distance-to-awc'] = {'min': min_distance_to_awc, 'max': max_distance_to_awc, 'avg': avg_distance_to_awc, 'selection_id': self.uid}
-            
-            #get distance to shipping lanes
-            min_distance_to_shipping = round(self.get_min_distance_to_shipping(leaseblocks), 0)
-            max_distance_to_shipping = round(self.get_max_distance_to_shipping(leaseblocks), 0)
-            miles_to_shipping = '%s to %s miles' %(min_distance_to_shipping, max_distance_to_shipping)
-            attributes.append({'title': 'Distance to Ship Routing Measures', 'data': miles_to_shipping})
-            avg_distance_to_shipping = round(self.get_avg_distance_to_shipping(leaseblocks),1)
-            avg_distance_to_shipping_output = '%s miles' %avg_distance_to_shipping
-            attributes.append({'title': 'Average Distance to Ship Routing Measures', 'data': avg_distance_to_shipping_output})
-            report_values['distance-to-shipping'] = {'min': min_distance_to_shipping, 'max': max_distance_to_shipping, 'avg': avg_distance_to_shipping, 'selection_id': self.uid}
-            
-            #get distance to shore range
-            min_distance = round(self.get_min_distance(leaseblocks), 0)
-            max_distance = round(self.get_max_distance(leaseblocks), 0)
-            distance_to_shore = '%s to %s miles' %(min_distance, max_distance)
-            attributes.append({'title': 'Distance to Shore', 'data': distance_to_shore})
-            avg_distance = round(self.get_avg_distance(leaseblocks),1)
-            avg_distance_output = '%s miles' %avg_distance
-            attributes.append({'title': 'Average Distance to Shore', 'data': avg_distance_output})
-            report_values['distance-to-shore'] = {'min': min_distance, 'max': max_distance, 'avg': avg_distance, 'selection_id': self.uid}
-            
-            #get depth range
-            min_depth = round(self.get_min_depth(leaseblocks), 0)
-            max_depth = round(self.get_max_depth(leaseblocks), 0)
-            depth_range = '%s to %s meters' %(min_depth, max_depth)
-            if min_depth == 0 or max_depth == 0:
-                depth_range = 'Unknown'
-            attributes.append({'title': 'Depth', 'data': depth_range})
-            avg_depth = round(self.get_avg_depth(leaseblocks), 0)
-            avg_depth_output = '%s meters' %avg_depth
-            if avg_depth == 0:
-                avg_depth_output = 'Unknown'
-            attributes.append({'title': 'Average Depth', 'data': avg_depth_output})
-            report_values['depth'] = {'min': min_depth, 'max': max_depth, 'avg': avg_depth, 'selection_id': self.uid}
-            '''
-            if self.input_filter_ais_density:
-                attributes.append({'title': 'Excluding Areas with High Ship Traffic', 'data': ''})
-            '''    
-                
-            attributes.append({'title': 'Number of Leaseblocks', 'data': self.leaseblock_ids.count(',')+1})
+        blocks = LeaseBlock.objects.filter(prot_numb__in=self.leaseblock_ids.split(','))
+
+        def mean(data):
+            return sum(data) / float(len(data))
+
+        if (len(blocks) > 0): 
+
+            report_values = {
+                'wind-speed': {
+                    'min': self.reduce(min, 
+                           [b.min_wind_speed_rev for b in blocks], digits=3, offset=-0.125),
+                    'max': self.reduce(max, 
+                           [b.max_wind_speed_rev for b in blocks], digits=3, offset=0.125),
+                    'avg': self.reduce(mean,
+                           [b.avg_wind_speed for b in blocks], digits=3),
+                    'selection_id': self.uid },
+
+                'distance-to-substation': {
+                    'min': self.reduce(min, 
+                           [b.substation_min_distance for b in blocks], digits=0),
+                    'max': self.reduce(max, 
+                           [b.substation_max_distance for b in blocks], digits=0),
+                    'avg': self.reduce(mean,
+                           [b.substation_mean_distance for b in blocks], digits=1),
+                    'selection_id': self.uid },
+
+                'distance-to-awc': {
+                    'min': self.reduce(min, 
+                           [b.awc_min_distance for b in blocks], digits=0),
+                    'max': self.reduce(max, 
+                           [b.awc_max_distance for b in blocks], digits=0),
+                    'avg': self.reduce(mean,
+                           [b.awc_avg_distance for b in blocks], digits=1),
+                    'selection_id': self.uid },
+
+                'distance-to-shipping': {
+                    'min': self.reduce(min, 
+                           [b.tsz_min_distance for b in blocks], digits=0),
+                    'max': self.reduce(max, 
+                           [b.tsz_max_distance for b in blocks], digits=0),
+                    'avg': self.reduce(mean,
+                           [b.tsz_mean_distance for b in blocks], digits=1),
+                    'selection_id': self.uid },
+
+                'distance-to-shore': {
+                    'min': self.reduce(min, 
+                           [b.min_distance for b in blocks], digits=0),
+                    'max': self.reduce(max, 
+                           [b.max_distance for b in blocks], digits=0),
+                    'avg': self.reduce(mean,
+                           [b.avg_distance for b in blocks], digits=1),
+                    'selection_id': self.uid },
+
+                'depth': {
+                    # note: accounting for the issue in which max_depth
+                    # is actually a lesser depth than min_depth
+                    'min': -1 * self.reduce(max, 
+                           [b.max_distance for b in blocks], digits=0, handle_none=0),
+                    'max': -1 * self.reduce(min, 
+                           [b.min_distance for b in blocks], digits=0, handle_none=0),
+                    'avg': -1 * self.reduce(mean,
+                           [b.avg_distance for b in blocks], digits=0, handle_none=0),
+                    'selection_id': self.uid }}
+
+            attrs = (
+                ('Average Wind Speed Range',
+                    '%(min)s to %(max)s m/s' % report_values['wind-speed']),
+                ('Average Wind Speed',
+                    '%(avg)s m/s' % report_values['wind-speed']),
+                ('Distance to Coastal Substation',
+                    '%(min)s to %(max)s miles' % report_values['distance-to-substation']),
+                ('Average Distance to Coastal Substation',
+                     '%(avg)s miles' % report_values['distance-to-substation']),
+                ('Distance to Proposed AWC Hub',
+                    '%(min)s to %(max)s miles' % report_values['distance-to-awc']),
+                ('Average Distance to Proposed AWC Hub',
+                    '%(avg)s miles' % report_values['distance-to-awc']),
+                ('Distance to Ship Routing Measures',
+                    '%(min)s to %(max)s miles' % report_values['distance-to-shipping']),
+                ('Average Distance to Ship Routing Measures',
+                    '%(avg)s miles' % report_values['distance-to-shipping']),
+                ('Distance to Shore',
+                    '%(min)s to %(max)s miles' % report_values['distance-to-shore']),
+                ('Average Distance to Shore',
+                    '%(avg)s miles' % report_values['distance-to-shore']),
+                ('Depth',
+                    '%(min)s to %(max)s meters' % report_values['depth']),
+                ('Average Depth',
+                    '%(avg)s meters' % report_values['depth']),
+                ('Number of blocks',
+                    self.leaseblock_ids.count(',') + 1)
+            )
+
+            attributes = []
+            for t, d in attrs:
+                attributes.append({'title': t, 'data': d})
+
         else:
-            attributes.append({'title': 'Number of Leaseblocks', 'data': 0})
+            attributes = {'title': 'Number of blocks', 'data': 0}
+
         return { 'event': 'click', 'attributes': attributes, 'report_values': report_values }
     
-    def get_min_wind_speed(self, leaseblocks):
-        min_wind_speed = leaseblocks[0].min_wind_speed_rev
-        for lb in leaseblocks:
-            if lb.min_wind_speed_rev < min_wind_speed:
-                min_wind_speed = lb.min_wind_speed_rev
-        return min_wind_speed - .125
-                
-    def get_max_wind_speed(self, leaseblocks):
-        max_wind_speed = leaseblocks[0].max_wind_speed_rev
-        for lb in leaseblocks:
-            if lb.max_wind_speed_rev > max_wind_speed:
-                max_wind_speed = lb.max_wind_speed_rev
-        return max_wind_speed + .125
-          
-    def get_avg_wind_speed(self, leaseblocks):
-        total = 0
-        for lb in leaseblocks:
-            total += lb.min_wind_speed_rev
-            total += lb.max_wind_speed_rev
-        if total > 0:
-            return total / (len(leaseblocks) * 2)
-        else:
-            return 0
-    
-    def get_min_distance(self, leaseblocks): 
-        min_distance = leaseblocks[0].min_distance
-        for lb in leaseblocks:
-            if lb.min_distance < min_distance:
-                min_distance = lb.min_distance
-        return min_distance 
-    
-    def get_max_distance(self, leaseblocks):
-        max_distance = leaseblocks[0].max_distance
-        for lb in leaseblocks:
-            if lb.max_distance > max_distance:
-                max_distance = lb.max_distance
-        return max_distance 
-          
-    def get_avg_distance(self, leaseblocks):
-        total = 0
-        for lb in leaseblocks:
-            total += lb.avg_distance
-        if total > 0:
-            return total / (len(leaseblocks))
-        else:
-            return 0
-    
-    # note: accounting for the issue in which min_depth is actually a greater depth than max_depth 
-    def get_max_depth(self, leaseblocks): 
-        min_depth = leaseblocks[0].min_depth
-        for lb in leaseblocks:
-            if lb.min_depth < min_depth:
-                min_depth = lb.min_depth
-        return -min_depth
-    
-    # note: accounting for the issue in which max_depth is actually a lesser depth than min_depth
-    def get_min_depth(self, leaseblocks):
-        max_depth = leaseblocks[0].max_depth
-        for lb in leaseblocks:
-            if lb.max_depth > max_depth:
-                max_depth = lb.max_depth
-        return -max_depth
-          
-    def get_avg_depth(self, leaseblocks):
-        total = 0
-        for lb in leaseblocks:
-            total += lb.avg_depth
-        if total != 0:
-            avg = -total / (len(leaseblocks))
-            return avg
-        else:
-            return 0
-    
-    def get_min_distance_to_substation(self, leaseblocks): 
-        substation_min_distance = leaseblocks[0].substation_min_distance
-        for lb in leaseblocks:
-            if lb.substation_min_distance < substation_min_distance:
-                substation_min_distance = lb.substation_min_distance
-        return substation_min_distance
-    
-    def get_max_distance_to_substation(self, leaseblocks):
-        substation_max_distance = leaseblocks[0].substation_max_distance
-        for lb in leaseblocks:
-            if lb.substation_max_distance > substation_max_distance:
-                substation_max_distance = lb.substation_max_distance
-        return substation_max_distance
-          
-    def get_avg_distance_to_substation(self, leaseblocks):
-        total = 0
-        for lb in leaseblocks:
-            total += lb.substation_mean_distance
-        if total != 0:
-            avg = total / len(leaseblocks)
-            return avg
-        else:
-            return 0
-    
-    def get_min_distance_to_awc(self, leaseblocks): 
-        awc_min_distance = leaseblocks[0].awc_min_distance
-        for lb in leaseblocks:
-            if lb.awc_min_distance < awc_min_distance:
-                awc_min_distance = lb.awc_min_distance
-        return awc_min_distance
-    
-    def get_max_distance_to_awc(self, leaseblocks):
-        awc_max_distance = leaseblocks[0].awc_max_distance
-        for lb in leaseblocks:
-            if lb.awc_max_distance > awc_max_distance:
-                awc_max_distance = lb.awc_max_distance
-        return awc_max_distance
-          
-    def get_avg_distance_to_awc(self, leaseblocks):
-        total = 0
-        for lb in leaseblocks:
-            total += lb.awc_avg_distance
-        if total != 0:
-            avg = total / len(leaseblocks)
-            return avg
-        else:
-            return 0
-    
-    def get_min_distance_to_shipping(self, leaseblocks): 
-        tsz_min_distance = leaseblocks[0].tsz_min_distance
-        for lb in leaseblocks:
-            if lb.tsz_min_distance < tsz_min_distance:
-                tsz_min_distance = lb.tsz_min_distance
-        return tsz_min_distance
-    
-    def get_max_distance_to_shipping(self, leaseblocks):
-        tsz_max_distance = leaseblocks[0].tsz_max_distance
-        for lb in leaseblocks:
-            if lb.tsz_max_distance > tsz_max_distance:
-                tsz_max_distance = lb.tsz_max_distance
-        return tsz_max_distance
-          
-    def get_avg_distance_to_shipping(self, leaseblocks):
-        total = 0
-        for lb in leaseblocks:
-            total += lb.tsz_mean_distance
-        if total != 0:
-            return total / len(leaseblocks)
-        else:
-            return 0
-    
+    @staticmethod
+    def reduce(func, data, digits=None, filter_null=True, handle_none='Unknown', offset=None):
+        """
+        self.reduce: LeaseBlock's custom reduce
+        why not the built-in reduce()? 
+            handles rounding, null values, practical defaults.
+
+        Input:
+            func : function that aggregates data to a single value
+            data : list of values
+        Returns: a single value or a sensible default 
+                 with some presentation logic intermingled
+
+        In the case of `None` in your list,
+        you can either filter them out with `filter_null` (default) or
+        you can bail and use `handle_none` 
+            which either raises an exception or returns a default "null" value
+
+        Rounding and offsetting by constant values are also handled 
+        for backwards compatibility. 
+        """
+        if filter_null:
+            # Filter the incoming data to remove "nulls"
+            # remove anything that is not a number
+            data = [x for x in data if isinstance(x, (int, long, float, complex))]
+
+        # Deal with any remaining None values
+        if not data or None in data:
+            if isinstance(handle_none, Exception):
+                # We raise the exception to be handled upstream
+                raise handle_none
+            else:
+                # bail and return the `handle_none` object
+                # used for presentation or upstream logic ("Unknown", 0 or None)
+                return handle_none
+
+        # Rounding and offsetting
+        agg = func(data)
+        if offset:
+            agg = agg + offset
+        if isinstance(digits, int):
+            agg = round(agg, digits)
+
+        return agg
     
     def run(self):
         leaseblocks = LeaseBlock.objects.filter(prot_numb__in=self.leaseblock_ids.split(','))
