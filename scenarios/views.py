@@ -7,6 +7,7 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import slugify
 from django.views.decorators.cache import cache_page
+from django.views.decorators.csrf import csrf_exempt
 
 from features.registry import user_sharing_groups
 from scenarios.models import Scenario, LeaseBlockSelection, LeaseBlock
@@ -26,6 +27,7 @@ def sdc_analysis(request, sdc_id):
     return display_sdc_analysis(request, sdc_obj)
     
 
+@csrf_exempt
 def copy_design(request, uid):
     try:
         design_obj = get_feature_by_uid(uid)
@@ -53,6 +55,7 @@ def copy_design(request, uid):
     return HttpResponse(dumps(json), status=200)
     
 
+@csrf_exempt
 def delete_design(request, uid):
     try:
         design_obj = get_feature_by_uid(uid)
@@ -207,6 +210,7 @@ def get_sharing_groups(request):
     
 '''
 '''    
+@csrf_exempt
 def share_design(request):
     from django.contrib.auth.models import Group
     group_names = request.POST.getlist('groups[]')
