@@ -5,16 +5,12 @@ from nursery.geojson.geojson import srid_to_urn, get_feature_json
 
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
-from django.template.defaultfilters import slugify
 from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 
-from features.registry import user_sharing_groups
 from scenarios.models import Scenario, LeaseBlockSelection, LeaseBlock
 from django.conf import settings
 import json
-from functools import cmp_to_key
-import locale
 
 
 def sdc_analysis(request, sdc_id):
