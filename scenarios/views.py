@@ -191,7 +191,6 @@ def get_attributes(request, uid):
 '''    
 @csrf_exempt
 def share_design(request):
-    from django.contrib.auth.models import Group
     group_names = request.POST.getlist('groups[]')
     design_uid = request.POST['scenario']
     design = get_feature_by_uid(design_uid)
@@ -200,9 +199,9 @@ def share_design(request):
         return response
     #remove previously shared with groups, before sharing with new list
     design.share_with(None)
-    groups = []
-    for group_name in group_names:
-        groups.append(Group.objects.get(name=group_name))
+    groups = request.user.mapgroupmember_set.all()
+    groups = groups.filter(map_group__name__in=group_names)
+    groups = [g.map_group.get_permission_group() for g in groups]
     design.share_with(groups, append=False)
     return HttpResponse("", status=200)
     
