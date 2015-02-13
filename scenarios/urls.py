@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 from views import (sdc_analysis, delete_design, get_attributes, get_scenarios,
-                   get_leaseblocks, get_leaseblock_features, get_sharing_groups,
+                   get_leaseblocks, get_leaseblock_features,
                    share_design, copy_design, get_selections) 
 
 urlpatterns = patterns('',
@@ -13,7 +13,6 @@ urlpatterns = patterns('',
     url(r'get_attributes/(?P<uid>[\w_]+)/$', get_attributes), 
     url(r'get_scenarios$', get_scenarios),
     url(r'get_leaseblocks$', get_leaseblocks),
-    url(r'get_sharing_groups$', get_sharing_groups),
     url(r'share_design$', share_design),
     url(r'copy_design/(?P<uid>[\w_]+)/$', copy_design),
     url(r'get_selections$', get_selections),

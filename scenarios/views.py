@@ -187,27 +187,6 @@ def get_attributes(request, uid):
     
     return HttpResponse(dumps(scenario_obj.serialize_attributes))
 
-
-def get_sharing_groups(request):
-    # FIXME: setlocale is not thread safe, and why are we setting the locale here? 
-    locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-    json = []
-    sharing_groups = user_sharing_groups(request.user)
-    for group in sharing_groups:
-        members = []
-        for user in group.user_set.all():
-            if user.first_name.strip() and user.last_name.strip():
-                members.append(user.first_name + ' ' + user.last_name)
-            else:
-                members.append(user.username)
-        sorted_members = sorted(members, key=cmp_to_key(locale.strcoll))
-        json.append({
-            'group_name': group.name,
-            'group_slug': slugify(group.name) + '-sharing',
-            'members': sorted_members
-        })
-    return HttpResponse(dumps(json))
-    
 '''
 '''    
 @csrf_exempt
