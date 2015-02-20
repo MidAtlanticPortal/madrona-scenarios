@@ -5,16 +5,12 @@ from nursery.geojson.geojson import srid_to_urn, get_feature_json
 
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
-from django.template.defaultfilters import slugify
 from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 
-from features.registry import user_sharing_groups
 from scenarios.models import Scenario, LeaseBlockSelection, LeaseBlock
 from django.conf import settings
 import json
-from functools import cmp_to_key
-import locale
 
 
 def sdc_analysis(request, sdc_id):
@@ -187,32 +183,10 @@ def get_attributes(request, uid):
     
     return HttpResponse(dumps(scenario_obj.serialize_attributes))
 
-
-def get_sharing_groups(request):
-    # FIXME: setlocale is not thread safe, and why are we setting the locale here? 
-    locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-    json = []
-    sharing_groups = user_sharing_groups(request.user)
-    for group in sharing_groups:
-        members = []
-        for user in group.user_set.all():
-            if user.first_name.strip() and user.last_name.strip():
-                members.append(user.first_name + ' ' + user.last_name)
-            else:
-                members.append(user.username)
-        sorted_members = sorted(members, key=cmp_to_key(locale.strcoll))
-        json.append({
-            'group_name': group.name,
-            'group_slug': slugify(group.name) + '-sharing',
-            'members': sorted_members
-        })
-    return HttpResponse(dumps(json))
-    
 '''
 '''    
 @csrf_exempt
 def share_design(request):
-    from django.contrib.auth.models import Group
     group_names = request.POST.getlist('groups[]')
     design_uid = request.POST['scenario']
     design = get_feature_by_uid(design_uid)
@@ -221,9 +195,9 @@ def share_design(request):
         return response
     #remove previously shared with groups, before sharing with new list
     design.share_with(None)
-    groups = []
-    for group_name in group_names:
-        groups.append(Group.objects.get(name=group_name))
+    groups = request.user.mapgroupmember_set.all()
+    groups = groups.filter(map_group__name__in=group_names)
+    groups = [g.map_group.get_permission_group() for g in groups]
     design.share_with(groups, append=False)
     return HttpResponse("", status=200)
     
