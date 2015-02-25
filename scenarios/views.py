@@ -197,7 +197,7 @@ def share_design(request):
     design.share_with(None)
     groups = request.user.mapgroupmember_set.all()
     groups = groups.filter(map_group__name__in=group_names)
-    groups = [g.map_group.get_permission_group() for g in groups]
+    groups = [g.map_group.permission_group for g in groups]
     design.share_with(groups, append=False)
     return HttpResponse("", status=200)
     
