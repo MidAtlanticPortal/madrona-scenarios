@@ -682,7 +682,6 @@ class LeaseBlockSelection(Analysis):
     geometry_actual = models.MultiPolygonField(srid=settings.GEOMETRY_DB_SRID,
         null=True, blank=True, verbose_name="Lease Block Selection Geometry")
     
-    @property
     def serialize_attributes(self):
         blocks = LeaseBlock.objects.filter(prot_numb__in=self.leaseblock_ids.split(','))
 

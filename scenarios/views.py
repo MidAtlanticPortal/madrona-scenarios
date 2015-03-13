@@ -45,7 +45,7 @@ def copy_design(request, uid):
         'uid': design_obj.uid,
         'name': design_obj.name,
         'description': design_obj.description,
-        'attributes': design_obj.serialize_attributes
+        'attributes': design_obj.serialize_attributes()
     })
     
     return HttpResponse(dumps(json), status=200)
@@ -81,7 +81,7 @@ def get_scenarios(request):
             'uid': scenario.uid,
             'name': scenario.name,
             'description': scenario.description,
-            'attributes': scenario.serialize_attributes,
+            'attributes': scenario.serialize_attributes(),
             'sharing_groups': sharing_groups
         })
         
@@ -114,7 +114,7 @@ def get_selections(request):
             'uid': selection.uid,
             'name': selection.name,
             'description': selection.description,
-            'attributes': selection.serialize_attributes,
+            'attributes': selection.serialize_attributes(),
             'sharing_groups': sharing_groups
         })
         
@@ -128,7 +128,7 @@ def get_selections(request):
                 'uid': selection.uid,
                 'name': selection.name,
                 'description': selection.description,
-                'attributes': selection.serialize_attributes,
+                'attributes': selection.serialize_attributes(),
                 'shared': True,
                 'shared_by_username': username,
                 'shared_by_name': actual_name
@@ -181,7 +181,7 @@ def get_attributes(request, uid):
     if not viewable:
         return response
     
-    return HttpResponse(dumps(scenario_obj.serialize_attributes))
+    return HttpResponse(dumps(scenario_obj.serialize_attributes()))
 
 '''
 '''    
