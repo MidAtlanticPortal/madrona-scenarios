@@ -688,102 +688,104 @@ class LeaseBlockSelection(Analysis):
         def mean(data):
             return sum(data) / float(len(data))
 
-        if (len(blocks) > 0): 
+        if not blocks.exists():
+            return {'event': 'click',
+                    'attributes': {'title': 'Number of blocks', 'data': 0},
+                    'report_values': {}}
 
-            report_values = {
-                'wind-speed': {
-                    'min': self.reduce(min, 
-                           [b.min_wind_speed_rev for b in blocks], digits=3, offset=-0.125),
-                    'max': self.reduce(max, 
-                           [b.max_wind_speed_rev for b in blocks], digits=3, offset=0.125),
-                    'avg': self.reduce(mean,
-                           [b.avg_wind_speed for b in blocks], digits=3),
-                    'selection_id': self.uid },
+        report_values = {
+            'wind-speed': {
+                'min': self.reduce(min,
+                       [b.min_wind_speed_rev for b in blocks], digits=3, offset=-0.125),
+                'max': self.reduce(max,
+                       [b.max_wind_speed_rev for b in blocks], digits=3, offset=0.125),
+                'avg': self.reduce(mean,
+                       [b.avg_wind_speed for b in blocks], digits=3),
+                'selection_id': self.uid },
 
-                'distance-to-substation': {
-                    'min': self.reduce(min, 
-                           [b.substation_min_distance for b in blocks], digits=0),
-                    'max': self.reduce(max, 
-                           [b.substation_max_distance for b in blocks], digits=0),
-                    'avg': self.reduce(mean,
-                           [b.substation_mean_distance for b in blocks], digits=1),
-                    'selection_id': self.uid },
+            'distance-to-substation': {
+                'min': self.reduce(min,
+                       [b.substation_min_distance for b in blocks], digits=0),
+                'max': self.reduce(max,
+                       [b.substation_max_distance for b in blocks], digits=0),
+                'avg': self.reduce(mean,
+                       [b.substation_mean_distance for b in blocks], digits=1),
+                'selection_id': self.uid },
 
-                'distance-to-awc': {
-                    'min': self.reduce(min, 
-                           [b.awc_min_distance for b in blocks], digits=0),
-                    'max': self.reduce(max, 
-                           [b.awc_max_distance for b in blocks], digits=0),
-                    'avg': self.reduce(mean,
-                           [b.awc_avg_distance for b in blocks], digits=1),
-                    'selection_id': self.uid },
+            'distance-to-awc': {
+                'min': self.reduce(min,
+                       [b.awc_min_distance for b in blocks], digits=0),
+                'max': self.reduce(max,
+                       [b.awc_max_distance for b in blocks], digits=0),
+                'avg': self.reduce(mean,
+                       [b.awc_avg_distance for b in blocks], digits=1),
+                'selection_id': self.uid },
 
-                'distance-to-shipping': {
-                    'min': self.reduce(min, 
-                           [b.tsz_min_distance for b in blocks], digits=0),
-                    'max': self.reduce(max, 
-                           [b.tsz_max_distance for b in blocks], digits=0),
-                    'avg': self.reduce(mean,
-                           [b.tsz_mean_distance for b in blocks], digits=1),
-                    'selection_id': self.uid },
+            'distance-to-shipping': {
+                'min': self.reduce(min,
+                       [b.tsz_min_distance for b in blocks], digits=0),
+                'max': self.reduce(max,
+                       [b.tsz_max_distance for b in blocks], digits=0),
+                'avg': self.reduce(mean,
+                       [b.tsz_mean_distance for b in blocks], digits=1),
+                'selection_id': self.uid },
 
-                'distance-to-shore': {
-                    'min': self.reduce(min, 
-                           [b.min_distance for b in blocks], digits=0),
-                    'max': self.reduce(max, 
-                           [b.max_distance for b in blocks], digits=0),
-                    'avg': self.reduce(mean,
-                           [b.avg_distance for b in blocks], digits=1),
-                    'selection_id': self.uid },
+            'distance-to-shore': {
+                'min': self.reduce(min,
+                       [b.min_distance for b in blocks], digits=0),
+                'max': self.reduce(max,
+                       [b.max_distance for b in blocks], digits=0),
+                'avg': self.reduce(mean,
+                       [b.avg_distance for b in blocks], digits=1),
+                'selection_id': self.uid },
 
-                'depth': {
-                    # note: accounting for the issue in which max_depth
-                    # is actually a lesser depth than min_depth
-                    'min': -1 * self.reduce(max, 
-                           [b.max_distance for b in blocks], digits=0, handle_none=0),
-                    'max': -1 * self.reduce(min, 
-                           [b.min_distance for b in blocks], digits=0, handle_none=0),
-                    'avg': -1 * self.reduce(mean,
-                           [b.avg_distance for b in blocks], digits=0, handle_none=0),
-                    'selection_id': self.uid }}
+            'depth': {
+                # note: accounting for the issue in which max_depth
+                # is actually a lesser depth than min_depth
+                'min': -1 * self.reduce(max,
+                       [b.max_distance for b in blocks], digits=0, handle_none=0),
+                'max': -1 * self.reduce(min,
+                       [b.min_distance for b in blocks], digits=0, handle_none=0),
+                'avg': -1 * self.reduce(mean,
+                       [b.avg_distance for b in blocks], digits=0, handle_none=0),
+                'selection_id': self.uid }}
 
-            attrs = (
-                ('Average Wind Speed Range',
-                    '%(min)s to %(max)s m/s' % report_values['wind-speed']),
-                ('Average Wind Speed',
-                    '%(avg)s m/s' % report_values['wind-speed']),
-                ('Distance to Coastal Substation',
-                    '%(min)s to %(max)s miles' % report_values['distance-to-substation']),
-                ('Average Distance to Coastal Substation',
-                     '%(avg)s miles' % report_values['distance-to-substation']),
-                ('Distance to Proposed AWC Hub',
-                    '%(min)s to %(max)s miles' % report_values['distance-to-awc']),
-                ('Average Distance to Proposed AWC Hub',
-                    '%(avg)s miles' % report_values['distance-to-awc']),
-                ('Distance to Ship Routing Measures',
-                    '%(min)s to %(max)s miles' % report_values['distance-to-shipping']),
-                ('Average Distance to Ship Routing Measures',
-                    '%(avg)s miles' % report_values['distance-to-shipping']),
-                ('Distance to Shore',
-                    '%(min)s to %(max)s miles' % report_values['distance-to-shore']),
-                ('Average Distance to Shore',
-                    '%(avg)s miles' % report_values['distance-to-shore']),
-                ('Depth',
-                    '%(min)s to %(max)s meters' % report_values['depth']),
-                ('Average Depth',
-                    '%(avg)s meters' % report_values['depth']),
-                ('Number of blocks',
-                    self.leaseblock_ids.count(',') + 1)
-            )
+        attrs = (
+            ('Average Wind Speed Range',
+                '%(min)s to %(max)s m/s' % report_values['wind-speed']),
+            ('Average Wind Speed',
+                '%(avg)s m/s' % report_values['wind-speed']),
+            ('Distance to Coastal Substation',
+                '%(min)s to %(max)s miles' % report_values['distance-to-substation']),
+            ('Average Distance to Coastal Substation',
+                 '%(avg)s miles' % report_values['distance-to-substation']),
+            ('Distance to Proposed AWC Hub',
+                '%(min)s to %(max)s miles' % report_values['distance-to-awc']),
+            ('Average Distance to Proposed AWC Hub',
+                '%(avg)s miles' % report_values['distance-to-awc']),
+            ('Distance to Ship Routing Measures',
+                '%(min)s to %(max)s miles' % report_values['distance-to-shipping']),
+            ('Average Distance to Ship Routing Measures',
+                '%(avg)s miles' % report_values['distance-to-shipping']),
+            ('Distance to Shore',
+                '%(min)s to %(max)s miles' % report_values['distance-to-shore']),
+            ('Average Distance to Shore',
+                '%(avg)s miles' % report_values['distance-to-shore']),
+            ('Depth',
+                '%(min)s to %(max)s meters' % report_values['depth']),
+            ('Average Depth',
+                '%(avg)s meters' % report_values['depth']),
+            ('Number of blocks',
+                self.leaseblock_ids.count(',') + 1)
+        )
 
-            attributes = []
-            for t, d in attrs:
-                attributes.append({'title': t, 'data': d})
+        attributes = []
+        for t, d in attrs:
+            attributes.append({'title': t, 'data': d})
 
-        else:
-            attributes = {'title': 'Number of blocks', 'data': 0}
-
-        return { 'event': 'click', 'attributes': attributes, 'report_values': report_values }
+        return {'event': 'click',
+                'attributes': attributes,
+                'report_values': report_values}
     
     @staticmethod
     def reduce(func, data, digits=None, filter_null=True, handle_none='Unknown', offset=None):
@@ -832,13 +834,21 @@ class LeaseBlockSelection(Analysis):
     
     def run(self):
         leaseblocks = LeaseBlock.objects.filter(prot_numb__in=self.leaseblock_ids.split(','))
-        
+
+        if not leaseblocks.exists():
+            # We can't return False, because we'll get a collection without
+            # any lease blocks, which doesn't work on the client side.
+            # Throw an exception instead.
+            # TODO: Make the client handle the "selection didn't work" case.
+            # This is most likely because there are no lease blocks in the db.
+            raise Exception("No lease blocks available with the current selection.")
+
         dissolved_geom = leaseblocks.aggregate(Union('geometry'))
         if dissolved_geom:
             dissolved_geom = dissolved_geom['geometry__union']
         else:
             raise Exception("No lease blocks available with the current filters.")
-        
+
         if type(dissolved_geom) == MultiPolygon:
             self.geometry_actual = dissolved_geom
         else:
