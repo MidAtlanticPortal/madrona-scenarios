@@ -81,7 +81,6 @@ class Scenario(Analysis):
     geometry_final_area = models.FloatField(verbose_name='Total Area', null=True, blank=True)
     geometry_dissolved = models.MultiPolygonField(srid=settings.GEOMETRY_DB_SRID, null=True, blank=True, verbose_name="Scenario result dissolved")
                 
-    @property
     def serialize_attributes(self):
         attributes = []
         if self.input_parameter_wind_speed:
