@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from features.models import Feature
 from features.registry import get_feature_by_uid
 from json import dumps
@@ -69,7 +70,7 @@ def delete_design(request, uid):
     
     return HttpResponse("", status=200)
 
-
+@login_required()
 def get_scenarios(request):
     json = []
     
@@ -103,7 +104,7 @@ def get_scenarios(request):
         
     return HttpResponse(dumps(json))
 
-
+@login_required()
 def get_selections(request):
     json = []
     selections = LeaseBlockSelection.objects.filter(user=request.user).order_by('date_created')
