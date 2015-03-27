@@ -106,21 +106,26 @@
 
       <div id="step1" class="step">
         <p class="step-text"><i>Step 1 of 2 </i></p>
-        <p id="click-button-to-select" class="instructions">Click the button below to begin selecting your Lease Blocks from the map on the right.</p>
-        <a class="btn" style="margin-top: 10px" data-bind="click: toggleSelectionProcess">
-            <span data-bind="text: selectingLeaseBlocks() ? 'Complete Selection' : 'Select Lease Blocks'"></span>
-        </a>
+        <p id="click-button-to-select" class="instructions">Click the button
+            below to begin selecting your Lease Blocks from the map on the
+            right.</p>
 
         {{ form.leaseblock_ids.as_hidden }}
 
-        <div style="margin-top: 10px">
-            <label id="lease-blocks-layer-toggle" data-bind="click: toggleLeaseBlockLayer">
+          <div class="btn-group">
+
+        <a class="btn btn-default" style="margin-top: 10px" data-bind="click: toggleSelectionProcess">
+            <span data-bind="text: selectingLeaseBlocks() ? 'Complete Selection' : 'Select Lease Blocks'"></span>
+        </a>
+
+            <label class="btn btn-default" id="lease-blocks-layer-toggle" data-bind="click: toggleLeaseBlockLayer">
                 <input id="lease-blocks-layer-checkbox"
                        data-bind="checked: leaseBlockLayer.active()"
                        type="checkbox" name="checkbox" value="value">
                 Show OCS Lease Blocks</input>
             </label>
         </div>
+
         <div style="padding-top: 20px" >
             <div data-bind="visible: selectingLeaseBlocks()" class="well">
                 <div id="selection-instructions">
@@ -132,7 +137,7 @@
                     </div>
                 </div>
                 <div style="padding-top: 10px">
-                    NOTE:   Map Pan and Zoom are disabled during the selection process.
+                    NOTE: Map Pan and Zoom are disabled during the selection process.
                 </div>
             </div>
         </div>
@@ -165,49 +170,16 @@
 
     <div class="wizard_nav" style="width:100%">
         <div class="btn-group pull-right">
-            <a href="#" class="button btn" onclick="this.blur(); return false;" id="button_prev"><span>&lt; Previous</span></a>
-            <a href="#" class="button btn"  onclick="this.blur(); return false;" id="button_next"><span>Next &gt;</span></a>
-            <a href="#" class="submit_button button btn" onclick="this.blur(); return false;"><span>Save</span></a>
+            <a href="#" class="btn btn-default" onclick="this.blur(); return false;" id="button_prev"><span>&lt; Previous</span></a>
+            <a href="#" class="btn btn-default"  onclick="this.blur(); return false;" id="button_next"><span>Next &gt;</span></a>
+            <a href="#" class="submit_button btn btn-primary" onclick="this.blur(); return false;"><span>Save</span></a>
         </div>
     </div>
 
     <div>
         <div class="btn-group pull-left">
-            <a href="#" class="cancel_button button red btn"><span>Cancel</span></a>
+            <a href="#" class="cancel_button btn btn-danger"><span>Cancel</span></a>
 
         </div>
     </div>
-
-
-    <!-- TODO: clean up the following (much of it is not being used) after we've made some progress -->
-    <style type="text/css">
-
-    p.step-text {
-        margin: 0px;
-        padding-left: 0px;
-        text-align:left;
-    }
-
-    .poodle .panel form {
-        /*background: none repeat scroll 0 0 #DDDDDD;*/
-        border: 1px solid #BBBBBB;
-        border-radius: 10px 10px 10px 10px;
-        height: 60%;
-        padding: 10px;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-
-
-    .poodle .panel > form textarea,
-    .poodle .panel > form input[name="name"] {
-        width: 90%;
-    }
-
-    .errorlist {
-        color: red;
-    }
-
-    </style>
-
 </div>
