@@ -2,12 +2,7 @@
 
     {% load static from staticfiles %}
 
-    {% if form.media %} {{ form.media }} {% endif %}
-    <h4>
-        <!--<img src="/media/marco/img/multi.png"/>-->
-        Wind Energy Siting
-
-    </h4>
+    <h4>Wind Energy Siting</h4>
 
     <form id="wind-design-form" action="{{ action }}" method="post">
         {% for hidden in form.hidden_fields %}
@@ -29,13 +24,11 @@
                 <ul class="parameters">
                     <li>
                         <div class="accordion" id="wind-speed-accordion">
-                            <div class="accordion-heading"
-                                 data-bind="click: toggleWindSpeedWidget">
+                            <div class="accordion-heading" data-bind="click: toggleWindSpeedWidget">
                                 <label class="accordion-toggle">
                                     {{ form.input_parameter_wind_speed }}
-                                    <i class="check icon-large icon-check"
-                                       data-bind="visible: windSpeedParameter()"></i>
-                                    <i class="check icon-large icon-check-empty"></i>
+                                    <i class="fa fa-check-square" data-bind="visible: windSpeedParameter()"></i>
+                                    <i class="fa fa-square-o" data-bind="visible: !windSpeedParameter()"></i>
                                     <span class="parameter-label"
                                           style="margin-left: 5px">Wind Speed </span>
                                     <i class="info-icon icon-info-sign"
@@ -52,9 +45,9 @@
                                 <div class="accordion-inner">
                                     <div>
                                         Potential:
-                            <span class="label">
-                                <span id="wind_speed_text" class="potential">Outstanding</span>
-                            </span>
+                                        <span class="label">
+                                            <span id="wind_speed_text" class="potential">Outstanding</span>
+                                        </span>
                                     </div>
                                     <div>
                                         Min Avg Speed (m/s)
@@ -93,9 +86,9 @@
                                  data-bind="click: toggleSubstationWidget">
                                 <label class="accordion-toggle">
                                     {{ form.input_parameter_distance_to_substation }}
-                                    <i class="check icon-large icon-check"
-                                       data-bind="visible: distanceToSubstationParameter()"></i>
-                                    <i class="check icon-large icon-check-empty"></i>
+                                    <i class="fa fa-check-square" data-bind="visible: distanceToSubstationParameter()"></i>
+                                    <i class="fa fa-square-o" data-bind="visible: !distanceToSubstationParameter()"></i>
+
                                     <span class="parameter-label"
                                           style="margin-left: 5px">Distance to Coastal Substation </span>
                                     <!--<img src="/media/marco/img/info.png" id="info_substation" class="info" />-->
@@ -126,9 +119,8 @@
                                  data-bind="click: toggleAWCWidget">
                                 <label class="accordion-toggle">
                                     {{ form.input_parameter_distance_to_awc }}
-                                    <i class="check icon-large icon-check"
-                                       data-bind="visible: distanceToAWCParameter()"></i>
-                                    <i class="check icon-large icon-check-empty"></i>
+                                    <i class="fa fa-check-square" data-bind="visible: distanceToAWCParameter()"></i>
+                                    <i class="fa fa-square-o" data-bind="visible: !distanceToAWCParameter()"></i>
                                     <span class="parameter-label"
                                           style="margin-left: 5px">Distance to Proposed AWC Hubs </span>
                                     <!--<img src="/media/marco/img/info.png" id="info_awc" class="info" />-->
@@ -181,9 +173,9 @@
                                  data-bind="click: toggleDistanceToShoreWidget">
                                 <label class="accordion-toggle">
                                     {{ form.input_parameter_distance_to_shore }}
-                                    <i class="check icon-large icon-check"
-                                       data-bind="visible: distanceToShoreParameter()"></i>
-                                    <i class="check icon-large icon-check-empty"></i>
+                                    <i class="fa fa-check-square" data-bind="visible: distanceToShoreParameter()"></i>
+                                    <i class="fa fa-square-o" data-bind="visible: !distanceToShoreParameter()"></i>
+
                                     <span class="parameter-label"
                                           style="margin-left: 5px">Distance to Shore  </span>
                                     <i class="info-icon icon-info-sign"
@@ -215,9 +207,8 @@
                                  data-bind="click: toggleDepthWidget">
                                 <label class="accordion-toggle">
                                     {{ form.input_parameter_depth }}
-                                    <i class="check icon-large icon-check"
-                                       data-bind="visible: depthRangeParameter()"></i>
-                                    <i class="check icon-large icon-check-empty"></i>
+                                    <i class="fa fa-check-square" data-bind="visible: depthRangeParameter()"></i>
+                                    <i class="fa fa-square-o" data-bind="visible: !depthRangeParameter()"></i>
                                     <span class="parameter-label"
                                           style="margin-left: 5px">Depth Range  </span>
                                     <!--<img src="/media/marco/img/info.png" id="info_depth" class="info" />-->
@@ -281,9 +272,9 @@
                                  data-bind="click: toggleShippingLanesWidget">
                                 <label class="accordion-toggle">
                                     {{ form.input_filter_distance_to_shipping }}
-                                    <i class="check icon-large icon-check"
-                                       data-bind="visible: distanceToShippingParameter()"></i>
-                                    <i class="check icon-large icon-check-empty"></i>
+                                    <i class="fa fa-check-square" data-bind="visible: distanceToShippingParameter()"></i>
+                                    <i class="fa fa-square-o" data-bind="visible: !distanceToShippingParameter()"></i>
+
                                     <span class="parameter-label"
                                           style="margin-left: 5px">Distance to Ship Routing Measures </span>
                                     <!--<img src="/media/marco/img/info.png" id="info_lanes" class="info" />-->
@@ -340,11 +331,10 @@
                             <div class="accordion-heading"
                                  data-bind="click: toggleShipTrafficWidget">
                                 {{ form.input_filter_ais_density }}
-                                <label id="ship_traffic_density_widget"
-                                       class="accordion-toggle">
-                                    <i class="check icon-large icon-check"
-                                       data-bind="visible: shipTrafficDensityParameter()"></i>
-                                    <i class="check icon-large icon-check-empty"></i>
+                                <label id="ship_traffic_density_widget" class="accordion-toggle">
+                                    <i class="fa fa-check-square" data-bind="visible: shipTrafficDensityParameter()"></i>
+                                    <i class="fa fa-square-o" data-bind="visible: !shipTrafficDensityParameter()"></i>
+
                                     <span class="parameter-label"
                                           style="margin-left: 5px">Exclude Areas with High or Moderate Ship Traffic </span>
                                     <!--<img src="/media/marco/img/info.png" id="info_ais" class="info" />-->
@@ -371,9 +361,9 @@
                                  data-bind="click: toggleUXOWidget">
                                 {{ form.input_filter_uxo }}
                                 <label id="uxo_widget" class="accordion-toggle">
-                                    <i class="check icon-large icon-check"
-                                       data-bind="visible: uxoParameter()"></i>
-                                    <i class="check icon-large icon-check-empty"></i>
+                                    <i class="fa fa-check-square" data-bind="visible: uxoParameter()"></i>
+                                    <i class="fa fa-square-o" data-bind="visible: !uxoParameter()"></i>
+
                                     <span class="parameter-label"
                                           style="margin-left: 5px">Exclude Areas with Unexploded Ordnances </span>
                                     <!--<img src="/media/marco/img/info.png" id="info_uxo" class="info" />-->
@@ -466,18 +456,27 @@
 
     <div class="wizard_nav" style="width:100%">
         <div class="btn-group pull-right">
-            <a href="#" class="button btn" onclick="this.blur(); return false;"
-               id="button_prev"><span>&lt; Previous</span></a>
-            <a href="#" class="button btn" onclick="this.blur(); return false;"
-               id="button_next"><span>Next &gt;</span></a>
-            <a href="#" class="submit_button button btn"
-               onclick="this.blur(); return false;"><span>Save</span></a>
+            <a href="#" class="btn btn-default"
+               onclick="this.blur(); return false;"
+               id="button_prev">
+                <span>&lt; Previous</span>
+            </a>
+
+            <a href="#" class="btn btn-default" onclick="this.blur(); return false;"
+               id="button_next">
+                <span>Next &gt;</span>
+            </a>
+
+            <a href="#" class="submit_button btn btn-primary"
+               onclick="this.blur(); return false;">
+                <span>Save</span>
+            </a>
         </div>
     </div>
 
     <div>
         <div class="btn-group pull-left">
-            <a href="#" class="cancel_button button red btn"><span>Cancel</span></a>
+            <a href="#" class="cancel_button btn btn-danger"><span>Cancel</span></a>
 
         </div>
     </div>
@@ -487,8 +486,6 @@
         jQuery.getScript("{% static 'scenarios_form.js' %}", function () {
             console.debug("Loaded: {% static 'scenarios_form.js' %}");
         });
-        var link = '<link rel="stylesheet" type="text/css" href="{% static 'scenarios_form.css' %}">';
-        $('head').append(link);
     </script>
 
 
