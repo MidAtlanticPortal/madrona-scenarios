@@ -215,8 +215,7 @@
             <div id="step2_inputs">
                 <ul class="parameters">
                     <li>
-                        <div class="accordion"
-                             id="distance-to-shipping-accordion">
+                        <div class="accordion">
                             <div class="accordion-heading"
                                  data-bind="click: toggleShippingLanesWidget">
                                 <label class="accordion-toggle">
@@ -224,8 +223,7 @@
                                     <i class="fa fa-check-square" data-bind="visible: distanceToShippingParameter()"></i>
                                     <i class="fa fa-square-o" data-bind="visible: !distanceToShippingParameter()"></i>
 
-                                    <span class="parameter-label"
-                                          style="margin-left: 5px">Distance to Ship Routing Measures </span>
+                                    <span class="parameter-label">Distance to Ship Routing Measures </span>
                                     <!--<img src="/media/marco/img/info.png" id="info_lanes" class="info" />-->
                                     <i class="fa fa-info-circle info-icon"
                                        data-toggle="popover"
@@ -239,35 +237,17 @@
                                  class="inputfield accordion-body collapse"
                                  data-bind="css: {'in': distanceToShippingParameter()}">
                                 <div class="accordion-inner">
-                                    <label class="param"> Minimum Distance
-                                        (miles)
-                                        {{ form.input_distance_to_shipping }}
-                                        {{ form.input_distance_to_shipping.errors }}
-                                    </label>
-                                    <!--<div style="margin-top: 10px">
-                                        <label id="shipping-lanes-layer-toggle" data-bind="click: toggleShippingLanesLayer">
-                                            <input id="shipping-lanes-layer-checkbox" data-bind="checked: shippingLanesLayer.active()" type="checkbox" name="checkbox" value="value">
-                                            Show Shipping Lanes Data</input>
+                                    <div>
+                                        <label class="parameter-label"> Minimum Distance
+                                            (miles)
+                                            {{ form.input_distance_to_shipping }}
+                                            {{ form.input_distance_to_shipping.errors }}
                                         </label>
-                                    </div>-->
-                                    <div class="btn-group btn-group-layer show-layer-btn-group">
-                                        <a class="btn btn-info-sign"
-                                           style="height: 16px; line-height: 16px"
-                                           data-bind="click: toggleShippingLanesDescription, css: { 'active': shippingLanesLayer.infoActive() }">
-                                            <i class="icon-info-sign icon-large"></i>
-                                        </a>
-
-                                        <a class="btn btn-layer show-layer-btn"
+                                    </div>
+                                    <div>
+                                        <a class="btn btn-default btn-sm"
                                            data-bind="css: { 'active': shippingLanesLayer.active(), 'not-active': ! shippingLanesLayer.active() }, click: toggleShippingLanesLayer">
-                                            <div style="font-weight: normal">
-                                                <span>Show Ship Routing Measures Data</span>
-                                                <i class="check icon-large icon-check"
-                                                   style="top: 8px"
-                                                   data-bind="visible: shippingLanesLayer.active() && shippingLanesLayer.visible()"></i>
-                                                <i class="check icon-large icon-check-empty"
-                                                   style="top: 8px"
-                                                   data-bind="visible: shippingLanesLayer.active() && ! shippingLanesLayer.visible()"></i>
-                                            </div>
+                                            <span>Show Ship Routing Measures Data</span>
                                         </a>
                                     </div>
                                 </div>
@@ -275,17 +255,17 @@
                         </div>
                     </li>
                     <li>
-                        <div class="accordion"
-                             id="exclude-ship-traffic-selectbox">
+                        <div class="accordion">
                             <div class="accordion-heading"
                                  data-bind="click: toggleShipTrafficWidget">
+
                                 {{ form.input_filter_ais_density }}
-                                <label id="ship_traffic_density_widget" class="accordion-toggle">
+
+                                <label id="ship_traffic_density_widget" class="accordion-toggle checkbox">
                                     <i class="fa fa-check-square" data-bind="visible: shipTrafficDensityParameter()"></i>
                                     <i class="fa fa-square-o" data-bind="visible: !shipTrafficDensityParameter()"></i>
 
-                                    <span class="parameter-label"
-                                          style="margin-left: 5px">Exclude Areas with High or Moderate Ship Traffic </span>
+                                    <span class="parameter-label">Exclude Areas with High or Moderate Traffic </span>
                                     <!--<img src="/media/marco/img/info.png" id="info_ais" class="info" />-->
                                     <i class="fa fa-info-circle info-icon"
                                        data-toggle="popover"
@@ -299,23 +279,23 @@
                     </li>
                 </ul>
             </div>
-            <p></p>
             <label class="step-header">Security</label>
 
             <div id="step2_inputs">
                 <ul class="parameters">
                     <li>
-                        <div class="accordion" id="exclude-uxo-selectbox">
+                        <div class="accordion">
                             <div class="accordion-heading"
                                  data-bind="click: toggleUXOWidget">
+
                                 {{ form.input_filter_uxo }}
-                                <label id="uxo_widget" class="accordion-toggle">
+
+                                <label class="accordion-toggle checkbox">
                                     <i class="fa fa-check-square" data-bind="visible: uxoParameter()"></i>
                                     <i class="fa fa-square-o" data-bind="visible: !uxoParameter()"></i>
 
-                                    <span class="parameter-label"
-                                          style="margin-left: 5px">Exclude Areas with Unexploded Ordnances </span>
-                                    <!--<img src="/media/marco/img/info.png" id="info_uxo" class="info" />-->
+                                    <span class="parameter-label">Exclude Areas with Unexploded Ordnances</span>
+                                    <!--<img src="/media/marco/img/info.png" id="info_ais" class="info" />-->
                                     <i class="fa fa-info-circle info-icon"
                                        data-toggle="popover"
                                        data-content="Generalized and known areas where unexploded ordnance were dumped can be excluded."
