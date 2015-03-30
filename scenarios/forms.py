@@ -100,7 +100,7 @@ class ScenarioForm(FeatureForm):
                                                     widget=SliderWidget( min=1,max=10,step=1 ),
                                                     required=False)
 
-    input_filter_uxo = forms.BooleanField(widget=CheckboxInput(attrs={'class': 'parameters'}),
+    input_filter_uxo = forms.BooleanField(widget=CheckboxInput(attrs={'class': 'filters'}),
                                           required=False)
 
     
