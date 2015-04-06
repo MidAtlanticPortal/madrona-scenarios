@@ -61,13 +61,13 @@ madrona.onShow(function(){
 
         if (step == 1) {
             $('#button_prev').hide();
-            $('#button_next').css('border-radius', '4px');
+        //    $('#button_next').css('border-radius', '4px');
         } else {
             $('#button_prev').show();
-            $('#button_next').css('border-top-right-radius', '4px');
-            $('#button_next').css('border-bottom-right-radius', '4px');
-            $('#button_next').css('border-top-left-radius', '0px');
-            $('#button_next').css('border-bottom-left-radius', '0px');
+        //    $('#button_next').css('border-top-right-radius', '4px');
+        //    $('#button_next').css('border-bottom-right-radius', '4px');
+        //    $('#button_next').css('border-top-left-radius', '0px');
+        //    $('#button_next').css('border-bottom-left-radius', '0px');
         }
 
         if (step == max_step) {
@@ -266,7 +266,7 @@ madrona.onShow(function(){
         return false;
     });
     */
-    
+
     /* Tooltips */ 
     //overriding the template here to remove empty space for title
     $('.info-icon').popover({
