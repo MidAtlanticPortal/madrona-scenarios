@@ -120,21 +120,6 @@ span.form-image > img {
     margin-top: 15px;
 }
 
-
-p.step-text {
-    margin: 0px;
-    text-align:left;
-}
-p.instructions {
-    margin: 0px; 
-    margin-top: 10px;
-    margin-bottom: 0px;
-    text-align: left;
-    color: #47556C;
-    font-size: 14px;
-    font-weight: normal;
-    font-family: sans-serif;
-}
 form ul {
     margin-top: 5px;
     margin-bottom: 0px;
@@ -144,13 +129,14 @@ li label {
     font-weight: normal !important;
     margin-bottom: 0px !important;
 }
-form ul.parameters {
+
+/*form ul.parameters {
     list-style-type: none;
     margin-top: 5px;
     margin-bottom: 0px;
     padding-left: 0px;
     width: 90%;
-}
+}*/
 
 form ul.parameters i.info-icon {
     margin-left: 0px !important; 

@@ -73,7 +73,6 @@ class Scenario(Analysis):
     
     description = models.TextField(null=True, blank=True)
     satisfied = models.BooleanField(default=True)
-    #support_file = models.FileField(upload_to='scenarios/files/', null=True, blank=True)
     active = models.BooleanField(default=True)
             
     #I'm finding myself wishing lease_blocks was spelled without the underscore...            
@@ -81,7 +80,6 @@ class Scenario(Analysis):
     geometry_final_area = models.FloatField(verbose_name='Total Area', null=True, blank=True)
     geometry_dissolved = models.MultiPolygonField(srid=settings.GEOMETRY_DB_SRID, null=True, blank=True, verbose_name="Scenario result dissolved")
                 
-    @property
     def serialize_attributes(self):
         attributes = []
         if self.input_parameter_wind_speed:
