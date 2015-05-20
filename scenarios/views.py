@@ -96,7 +96,7 @@ def get_scenarios(request):
                 'uid': scenario.uid,
                 'name': scenario.name,
                 'description': scenario.description,
-                'attributes': scenario.serialize_attributes,
+                'attributes': scenario.serialize_attributes(),
                 'shared': True,
                 'shared_by_username': username,
                 'shared_by_name': actual_name
