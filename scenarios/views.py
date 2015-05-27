@@ -76,7 +76,10 @@ def get_scenarios(request):
     
     scenarios = Scenario.objects.filter(user=request.user, active=True).order_by('date_created')
     for scenario in scenarios:
-        sharing_groups = [group.name for group in scenario.sharing_groups.all()]
+        # Allow for "sharing groups" without an associated MapGroup, for "special" cases
+        sharing_groups = [group.mapgroup_set.get().name
+                          for group in scenario.sharing_groups.all()
+                          if group.mapgroup_set.exists()]
         json.append({
             'id': scenario.id,
             'uid': scenario.uid,
@@ -109,7 +112,9 @@ def get_selections(request):
     json = []
     selections = LeaseBlockSelection.objects.filter(user=request.user).order_by('date_created')
     for selection in selections:
-        sharing_groups = [group.name for group in selection.sharing_groups.all()]
+        sharing_groups = [group.mapgroup_set.get().name
+                          for group in selection.sharing_groups.all()
+                          if group.mapgroup_set.exists()]
         json.append({
             'id': selection.id,
             'uid': selection.uid,
