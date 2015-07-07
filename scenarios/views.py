@@ -1,13 +1,16 @@
+import io
 from django.contrib.auth.decorators import login_required
+from django.views.generic import View
 from features.models import Feature
 from features.registry import get_feature_by_uid
 from json import dumps
 from nursery.geojson.geojson import srid_to_urn, get_feature_json
 
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
+from scenarios.export import geometries_to_shp, create_metadata_xml, zip_objects
 
 from scenarios.models import Scenario, LeaseBlockSelection, LeaseBlock
 from django.conf import settings
@@ -241,4 +244,134 @@ def get_leaseblocks(request):
             'uxo': ocs_block.uxo
         })
     return HttpResponse(dumps(json))
+
+class GeometryExporter(View):
+    def get_feature(self, feature_id):
+        """Get a feature by ID.
+        Return tuple of (feature, geometry), or raise 404
+        """
+        try:
+            feature = get_feature_by_uid(feature_id)
+        except feature.__class__.DoesNotExist:
+            raise Http404()
+
+        if not feature.user == self.request.user:
+            # if we don't own the feature, see if it's shared with us
+            shared_with_user = feature.__class__.objects.shared_with_user(self.request.user)
+            shared_with_user = shared_with_user.filter(id=feature.id)
+            if not shared_with_user.exists():
+                raise Http404()
+
+        def getattr_alot(obj, attrs, default=None):
+            """Return the first attribute that isn't an attribute error,
+            or default
+            """
+            for attr in attrs:
+                if hasattr(obj, attr):
+                    return getattr(obj, attr, default)
+            return getattr(obj, attrs[-1]) # trigger AttributeError
+
+        # Even though the three objects are all subclasses of feature, they
+        # all have different names for the variable that they store geometry in.
+        # AOIs have "geometry_final", LeaseBlockSelections have 'geometry_actual'
+        # and Wind energy ("Scenario") has geometry_dissolved.
+        # Write a quick function to keep trying until it finds the right
+        # attribute name.
+        # A proper fix is, of course, to rename every reference to the same
+        # thing instead of inventing new names in subclasses.
+
+        geometry = getattr_alot(feature, ['geometry_final', 'geometry_actual',
+                                          'geometry_dissolved'])
+
+        return feature, geometry
+
+class ExportShapefile(GeometryExporter):
+    http_method_names = ['get']
+
+    def get(self, request, feature_id):
+        """Generate a zipped shape file & return it.
+        """
+
+        feature, geometry = self.get_feature(feature_id)
+        items = []
+
+        attrs = {'name': feature.name, 'description': feature.description}
+        items.extend(geometries_to_shp(feature.name, ((geometry, attrs),)))
+
+        # Other items for the zip file go here.
+
+        zip = zip_objects(items)
+        response = HttpResponse(content=zip.read(), content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename=%s.zip' % feature.name
+
+        return response
+
+
+class ExportGeoJSON(GeometryExporter):
+    http_method_names = ['get']
+
+    def get(self, request, feature_id):
+        """Generate a geojson file & return it.
+        """
+        feature, geometry = self.get_feature(feature_id)
+
+        gj = ('{"type": "Feature",'
+              '"crs": { "type": "name", "properties": {"name": "%s"}},'
+              '"properties": {}, "geometry": %s}')
+
+        # Transform to 4326. A lot of online tools (http://geojson.io)
+        # apparently don't understand anything else.
+        geom = geometry.transform(4326, clone=True)
+        gj = gj % (srid_to_urn(geom.srid), geom.geojson)
+
+        response = HttpResponse(content=gj, content_type='application/vnd.geo+json')
+        response['Content-Disposition'] = 'attachment; filename=%s.geojson' % feature.name
+
+        return response
+
+
+
+class ExportWKT(GeometryExporter):
+    http_method_names = ['get']
+
+    def get(self, request, feature_id):
+        """Generate a WKT string & return it in a text file.
+        """
+        feature, geometry = self.get_feature(feature_id)
+
+        wkt = geometry.wkt
+
+        response = HttpResponse(content=wkt, content_type='text/plain')
+        response['Content-Disposition'] = 'attachment; filename=%s-wkt.txt' % feature.name
+
+        return response
+
+
+
+class ExportKML(GeometryExporter):
+    http_method_names = ['get']
+
+    def get(self, request, feature_id):
+        """Generate a KML file & return it.
+        """
+        feature, geometry = self.get_feature(feature_id)
+
+        geom = geometry.transform(4326, clone=True)
+        kml = '''<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://earth.google.com/kml/2.1">
+<Document>
+    <name>{name}</name>
+    <Placemark>
+        <name>{name}</name>
+        {kmldata}
+    </Placemark>
+</Document>
+</kml>
+'''.format(name=feature.name, kmldata=geom.kml)
+
+        response = HttpResponse(content=kml, content_type='application/vnd.google-earth.kml+xml')
+        response['Content-Disposition'] = 'attachment; filename=%s.kml' % feature.name
+
+        return response
+
 
