@@ -1,11 +1,14 @@
 import datetime
-from django.contrib.gis.models import SpatialRefSys
+# Django 1.8+ upgrade - RDH 20180427
+# from django.contrib.gis import SpatialRefSys
+from django.db import connection
 import shapefile
 import io
 import zipfile
 
 def get_shp_projection(srid):
     try:
+        SpatialRefSys = connection.ops.spatial_ref_sys()
         s = SpatialRefSys.objects.get(srid=srid)
     except SpatialRefSys.DoesNotExist:
         return None
