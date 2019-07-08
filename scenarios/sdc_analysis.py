@@ -3,7 +3,7 @@ from django.template import RequestContext
 #from madrona.raster_stats.models import RasterDataset, zonal_stats
 from settings import *
 from general.utils import default_value, sq_meters_to_sq_miles
-from models import *
+from .models import *
 
 '''
 '''

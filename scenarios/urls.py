@@ -1,5 +1,5 @@
 from django.conf.urls import patterns, url
-from views import (sdc_analysis, delete_design, get_attributes, get_scenarios,
+from .views import (sdc_analysis, delete_design, get_attributes, get_scenarios,
                    get_leaseblocks, get_leaseblock_features,
                    share_design, copy_design, get_selections, ExportShapefile,
                    ExportGeoJSON, ExportWKT, ExportKML)
