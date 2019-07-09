@@ -14,6 +14,7 @@ from django.contrib.gis.db.models.aggregates import Union
 from django.utils.html import escape
 # import mapnik
 from picklefield import PickledObjectField
+from django.db.models import Manager as GeoManager
 
 @register
 class Scenario(Analysis):
@@ -576,7 +577,7 @@ class LeaseBlock(models.Model):
 
     geometry = models.MultiPolygonField(srid=settings.GEOMETRY_DB_SRID, null=True, blank=True, verbose_name="Lease Block Geometry")
     #geometry_client = models.MultiPolygonField(srid=settings.GEOMETRY_CLIENT_SRID, null=True, blank=True, verbose_name="Lease Block Client Geometry")
-    objects = models.GeoManager()
+    objects = GeoManager()
 
     @property
     def avg_wind_speed(self):
