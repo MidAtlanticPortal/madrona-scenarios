@@ -1,5 +1,8 @@
-# from django.conf.urls import patterns, url
-from django.urls import re_path, include
+try:
+    from django.urls import re_path, include
+except ModuleNotFoundError as e:
+    from django.conf.urls import url as re_path, include
+
 # from . import views
 from .views import (sdc_analysis, delete_design, get_attributes, get_scenarios,
                    get_leaseblocks, get_leaseblock_features,
