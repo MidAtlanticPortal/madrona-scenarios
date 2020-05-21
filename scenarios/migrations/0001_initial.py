@@ -12,7 +12,8 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('contenttypes', '0002_remove_content_type_name'),
-        ('auth', '0011_update_proxy_permissions'),
+        # ('auth', '0011_update_proxy_permissions'),
+        ('auth', '0007_alter_validators_add_error_messages'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
