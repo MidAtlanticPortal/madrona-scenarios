@@ -810,7 +810,7 @@ class LeaseBlockSelection(Analysis):
         if filter_null:
             # Filter the incoming data to remove "nulls"
             # remove anything that is not a number
-            data = [x for x in data if isinstance(x, (int, long, float, complex))]
+            data = [x for x in data if isinstance(x, (int, float, complex))]
 
         # Deal with any remaining None values
         if not data or None in data:
