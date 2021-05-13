@@ -378,7 +378,11 @@ def convertKMLCoords(kml):
             poly_list = [poly_list]
         for poly in poly_list:
             for key in poly.keys():
-                poly[key]['LinearRing']['coordinates'] = flipKMLCoords(poly[key]['LinearRing']['coordinates'])
+                if type(poly[key]) == list:
+                    for index, value in enumerate(poly[key]):
+                        poly[key][index]['LinearRing']['coordinates'] = flipKMLCoords(poly[key][index]['LinearRing']['coordinates'])
+                else:
+                    poly[key]['LinearRing']['coordinates'] = flipKMLCoords(poly[key]['LinearRing']['coordinates'])
         return xmltodict.unparse(kml_dict, full_document=False)
 
 class ExportKML(GeometryExporter):
