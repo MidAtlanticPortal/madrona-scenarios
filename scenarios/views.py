@@ -372,6 +372,8 @@ def convertKMLCoords(kml):
         kml_dict = xmltodict.parse(kml)
         if 'MultiGeometry' in kml_dict.keys():
             poly_list = kml_dict['MultiGeometry']['Polygon']
+            if type(poly_list) != list:
+                poly_list = [poly_list]
         else:
             poly_ist = kml_dict['Polygon']
         for poly in poly_list:
