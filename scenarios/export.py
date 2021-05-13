@@ -151,12 +151,15 @@ def geometries_to_shp(base_name, geom_attrs, srid=4326):
             for poly in geometry:
                 # coords = json.loads(poly.geojson)['coordinates']
                 coords = get_formatted_coords(poly)
-                writer.poly(coords)
+                try:
+                    writer.poly(coords)
+                except TypeError as e:
+                    writer.poly([coords])
                 writer.record(**transformed_attrs)
         else:
             # coords = json.loads(geometry.geojson)['coordinates']
             coords = get_formatted_coords(geometry)
-            writer.poly(coords[0])
+            writer.poly(coords)
             writer.record(**transformed_attrs)
 
     writer.close()
