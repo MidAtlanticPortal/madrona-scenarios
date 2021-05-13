@@ -10,7 +10,7 @@ from django.http import HttpResponse, Http404, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
-from scenarios.export import geometries_to_shp, create_metadata_xml, zip_objects
+from scenarios.export import geometries_to_shp, create_metadata_xml, zip_objects, get_formatted_coords
 
 from scenarios.models import Scenario, LeaseBlockSelection, LeaseBlock
 from django.conf import settings
@@ -322,7 +322,14 @@ class ExportGeoJSON(GeometryExporter):
         # Transform to 4326. A lot of online tools (http://geojson.io)
         # apparently don't understand anything else.
         geom = geometry.transform(4326, clone=True)
+        from scenarios.export import get_formatted_coords
+
         gj = gj % (srid_to_urn(geom.srid), geom.geojson)
+
+        #fix coordinate ofder based on gdal version:
+        gj_dict = json.loads(gj)
+        gj_dict['geometry']['coordinates'] = get_formatted_coords(geom)
+        gj = json.dumps(gj_dict)
 
         response = HttpResponse(content=gj, content_type='application/vnd.geo+json')
         response['Content-Disposition'] = 'attachment; filename=%s.geojson' % feature.name
