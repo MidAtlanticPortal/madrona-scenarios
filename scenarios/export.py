@@ -2,8 +2,9 @@ import datetime
 # Django 1.8+ upgrade - RDH 20180427
 # from django.contrib.gis import SpatialRefSys
 from django.db import connection
-import shapefile
 import io
+import json
+import shapefile
 import zipfile
 
 def get_shp_projection(srid):
@@ -83,11 +84,15 @@ def geometries_to_shp(base_name, geom_attrs, srid=4326):
     to being written to the shape file. The default value is 4326; ArcMap
     doesn't seem to recognize 3857 (Web mercator) as a valid projection.
     """
-    shp_bytes = io.BytesIO()
-    shx_bytes = io.BytesIO()
-    dbf_bytes = io.BytesIO()
+    try:
+        from StringIO import StringIO
+    except ImportError:
+        from io import BytesIO as StringIO
+    shp_bytes = StringIO()
+    shx_bytes = StringIO()
+    dbf_bytes = StringIO()
 
-    writer = shapefile.Writer(shapefile.POLYGON)
+    writer = shapefile.Writer(shp=shp_bytes, shx=shx_bytes, dbf=dbf_bytes, shapeType=shapefile.POLYGON)
 
     # type_map and field_transform should be extracted
     field_data = geom_attrs[0][1]
@@ -98,8 +103,7 @@ def geometries_to_shp(base_name, geom_attrs, srid=4326):
         float: {"fieldType": "N", "size": "18", "decimal": 4},
         datetime: {"fieldType": "D", "size": 8},
     }
-    type_map[unicode] = type_map[str]
-    for name, field_type in field_data.iteritems():
+    for name, field_type in field_data.items():
         args = type_map[type(field_type)]
         args['name'] = name
         writer.field(**args)
@@ -111,7 +115,6 @@ def geometries_to_shp(base_name, geom_attrs, srid=4326):
         float: lambda s: '%.4f' % s,
         datetime: lambda s: s.strftime('%Y%m%d'),
     }
-    field_transform[unicode] = field_transform[str]
 
     geometry = geom_attrs[0][0]
     if not srid:
@@ -122,21 +125,21 @@ def geometries_to_shp(base_name, geom_attrs, srid=4326):
             geometry = geometry.transform(srid, clone=True)
 
         transformed_attrs = dict((k, field_transform[type(v)](v))
-                         for k, v in attrs.iteritems())
+                         for k, v in attrs.items())
 
         if len(geometry) > 1:
             # Multipolygon; shapefiles apparently support polygons with multiple
             # exterior rings, but pyshp doesn't know how to write multipolygons
             for poly in geometry:
-                writer.poly(parts=poly)
+                coords = json.loads(poly.geojson)['coordinates']
+                writer.poly(coords)
                 writer.record(**transformed_attrs)
         else:
-            writer.poly(parts=geometry)
+            coords = json.loads(geometry.geojson)['coordinates']
+            writer.poly(coords[0])
             writer.record(**transformed_attrs)
 
-    writer.saveShp(shp_bytes)
-    writer.saveShx(shx_bytes)
-    writer.saveDbf(dbf_bytes)
+    writer.close()
 
     shp_bytes.seek(0)
     shx_bytes.seek(0)
