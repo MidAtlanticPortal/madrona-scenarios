@@ -15,6 +15,8 @@ from scenarios.export import geometries_to_shp, create_metadata_xml, zip_objects
 from scenarios.models import Scenario, LeaseBlockSelection, LeaseBlock
 from django.conf import settings
 import json
+import xmltodict
+from osgeo import gdal
 
 
 def sdc_analysis(request, sdc_id):
@@ -353,7 +355,29 @@ class ExportWKT(GeometryExporter):
 
         return response
 
+def flipKMLCoords(coord_str):
+        coord_list = coord_str.split(' ')
+        out_list = []
+        for coords in coord_list:
+            # take in lat, lon, zoom and return lon, lat, zoom
+            y, x, z = coords.split(',')
+            out_list.append(','.join([x,y,z]))
+        return ' '.join(out_list)
 
+def convertKMLCoords(kml):
+    # gdal v2.x and below got the order right.
+    if int(gdal.__version__.split('.')[0]) < 3:
+        return kml
+    else:
+        kml_dict = xmltodict.parse(kml)
+        if 'MultiGeometry' in kml_dict.keys():
+            poly_list = kml_dict['MultiGeometry']['Polygon']
+        else:
+            poly_ist = kml_dict['Polygon']
+        for poly in poly_list:
+            for key in poly.keys():
+                poly[key]['LinearRing']['coordinates'] = flipKMLCoords(poly[key]['LinearRing']['coordinates'])
+        return xmltodict.unparse(kml_dict, full_document=False)
 
 class ExportKML(GeometryExporter):
     http_method_names = ['get']
@@ -364,6 +388,10 @@ class ExportKML(GeometryExporter):
         feature, geometry = self.get_feature(feature_id)
 
         geom = geometry.transform(4326, clone=True)
+
+        #fix coordinate order based on gdal version:
+        kmldata = convertKMLCoords(geom.kml)
+
         kml = '''<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://earth.google.com/kml/2.1">
 <Document>
@@ -374,7 +402,7 @@ class ExportKML(GeometryExporter):
     </Placemark>
 </Document>
 </kml>
-'''.format(name=feature.name, kmldata=geom.kml)
+'''.format(name=feature.name, kmldata=kmldata)
 
         response = HttpResponse(content=kml, content_type='application/vnd.google-earth.kml+xml')
         response['Content-Disposition'] = 'attachment; filename=%s.kml' % feature.name
