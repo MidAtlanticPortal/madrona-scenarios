@@ -2,6 +2,7 @@ import datetime
 # Django 1.8+ upgrade - RDH 20180427
 # from django.contrib.gis import SpatialRefSys
 from django.db import connection
+from osgeo import gdal
 import io
 import json
 import shapefile
@@ -56,6 +57,23 @@ def attrs_to_description(attrs):
              for k, v in decoded)
     desc = u'\n'.join(lines)
     return desc
+
+def get_formatted_coords(geometry):
+    # GDAL/PyShp prior to v3 get the coordinate order for shapefile input right
+    # If running v3 or later, you need to invert the x and y coords for PyShp.
+    if int(gdal.__version__.split('.')[0]) < 3:
+        return json.loads(geometry.geojson)['coordinates']
+    else:
+        return formatCoordinates(geometry.coords)
+
+def formatCoordinates(data):
+    if type(data[0]) in [tuple, list]:
+        formatted_coords = []
+        for item in data:
+            formatted_coords.append(formatCoordinates(item))
+        return formatted_coords
+    else:
+        return list(data[::-1])
 
 def geometries_to_shp(base_name, geom_attrs, srid=4326):
     """Produce an item dictionary file containing shp, shx, dbf, and prj files.
@@ -131,11 +149,13 @@ def geometries_to_shp(base_name, geom_attrs, srid=4326):
             # Multipolygon; shapefiles apparently support polygons with multiple
             # exterior rings, but pyshp doesn't know how to write multipolygons
             for poly in geometry:
-                coords = json.loads(poly.geojson)['coordinates']
+                # coords = json.loads(poly.geojson)['coordinates']
+                coords = get_formatted_coords(poly)
                 writer.poly(coords)
                 writer.record(**transformed_attrs)
         else:
-            coords = json.loads(geometry.geojson)['coordinates']
+            # coords = json.loads(geometry.geojson)['coordinates']
+            coords = get_formatted_coords(geometry)
             writer.poly(coords[0])
             writer.record(**transformed_attrs)
 
